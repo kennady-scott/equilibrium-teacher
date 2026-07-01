@@ -103,10 +103,31 @@ export default function HomeScreen() {
     setShowMoodPrompt(false);
   }
 
+  const PIPPIN_REMINDERS = [
+    "You matter just as much as your students 💚",
+    "Taking care of me means taking care of yourself 🐹",
+    "You showed up today. That already counts 🌟",
+    "Your feelings are valid, even on the hard days 💙",
+    "Rest is not a reward — it's part of the job 🌿",
+    "What would you tell a struggling friend? Tell yourself that 💛",
+    "You can't pour from an empty cup. Let's fill yours 🐹",
+    "Small kindnesses to yourself add up more than you know 🌱",
+    "Being gentle with yourself is a skill worth practicing 💜",
+    "Your wellbeing is the foundation everything else rests on 💚",
+    "I noticed how hard you're working. Don't forget to breathe 🌬️",
+    "You are doing better than you think 🐹",
+    "One good moment today is enough. You don't need a perfect day 🌤️",
+    "The kids remember how you made them feel. You're doing that well 💛",
+    "Checking in on yourself counts as self-care 🐹",
+  ];
+  // Rotate daily so the message changes each day but stays stable within a day
+  const dayIndex = new Date().getDate() + new Date().getMonth() * 31;
+  const dailyReminder = PIPPIN_REMINDERS[dayIndex % PIPPIN_REMINDERS.length];
+
   const petStateMap = {
-    happy: { bg: ['#C8E6C9', '#E8F5E9'], msg: 'Your buddy is doing great today!', msgColor: '#388E3C' },
-    okay:  { bg: ['#FFF9C4', '#FFFDE7'], msg: "Pippin needs a little love 💛",    msgColor: '#F9A825' },
-    sad:   { bg: ['#FFCDD2', '#FFEBEE'], msg: "Pippin needs your help ❤️",        msgColor: '#C62828' },
+    happy: { bg: ['#C8E6C9', '#E8F5E9'], msgColor: '#388E3C' },
+    okay:  { bg: ['#FFF9C4', '#FFFDE7'], msgColor: '#F9A825' },
+    sad:   { bg: ['#FFCDD2', '#FFEBEE'], msgColor: '#C62828' },
   };
   const baseState = petStateMap[petMood];
   const { bg } = baseState;
@@ -115,7 +136,7 @@ export default function HomeScreen() {
                  : currentDayMode === 'sick'          ? 'Feel better soon. I\'ve got you 🐹'
                  : currentDayMode === 'conferences'   ? 'Deep breath. You\'re doing great 💜'
                  : currentDayMode === 'testing'       ? 'Your students are ready 🍫'
-                 : baseState.msg;
+                 : dailyReminder;
   const msgColor = isHardDay                         ? '#5B8DB8'
                  : currentDayMode === 'sub'           ? '#5B9E8F'
                  : currentDayMode === 'sick'          ? '#D4696B'
