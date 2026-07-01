@@ -9,6 +9,7 @@ import PippinHabitat from '../components/PippinHabitat';
 import HardDayCard from '../components/HardDayCard';
 import SubDayCard from '../components/SubDayCard';
 import SickDayCard from '../components/SickDayCard';
+import ConferencesCard from '../components/ConferencesCard';
 import DayModeModal from '../components/DayModeModal';
 
 const MOODS = [
@@ -34,10 +35,11 @@ export default function HomeScreen() {
 
   // After AppContext hydrates from AsyncStorage, show the right modal
   useEffect(() => {
-    if (!currentDayMode) {
+    if (currentDayMode) {
+      setShowDayMode(false); // already picked today — close it if it opened early
+      if (mood === null) setShowMoodPrompt(true);
+    } else {
       setShowDayMode(true);
-    } else if (mood === null) {
-      setShowMoodPrompt(true);
     }
   }, [currentDayMode]);
   const [habitatWidth, setHabitatWidth] = useState(340);
@@ -106,13 +108,15 @@ export default function HomeScreen() {
   };
   const baseState = petStateMap[petMood];
   const { bg } = baseState;
-  const msg      = isHardDay                ? "I'm right here with you 💙"
-                 : currentDayMode === 'sub'  ? 'Rest up. I\'ll hold things down 🐹'
-                 : currentDayMode === 'sick' ? 'Feel better soon. I\'ve got you 🐹'
+  const msg      = isHardDay                         ? "I'm right here with you 💙"
+                 : currentDayMode === 'sub'           ? 'Rest up. I\'ll hold things down 🐹'
+                 : currentDayMode === 'sick'          ? 'Feel better soon. I\'ve got you 🐹'
+                 : currentDayMode === 'conferences'   ? 'Deep breath. You\'re doing great 💜'
                  : baseState.msg;
-  const msgColor = isHardDay                ? '#5B8DB8'
-                 : currentDayMode === 'sub'  ? '#5B9E8F'
-                 : currentDayMode === 'sick' ? '#D4696B'
+  const msgColor = isHardDay                         ? '#5B8DB8'
+                 : currentDayMode === 'sub'           ? '#5B9E8F'
+                 : currentDayMode === 'sick'          ? '#D4696B'
+                 : currentDayMode === 'conferences'   ? '#9B7AB8'
                  : baseState.msgColor;
 
   const featuredGoals = goals.filter(g => g.featured).slice(0, 6).map(g => {
@@ -248,10 +252,17 @@ export default function HomeScreen() {
         {/* Sick Day card */}
         {currentDayMode === 'sick' && <SickDayCard />}
 
+        {/* Conferences card */}
+        {currentDayMode === 'conferences' && <ConferencesCard />}
+
         {/* Goals — full width tiles */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
-            {currentDayMode === 'sub' || currentDayMode === 'sick' ? '💛 Goals — no pressure today' : '📋 Today\'s Goals'}
+            {currentDayMode === 'sub' || currentDayMode === 'sick'
+            ? '💛 Goals — no pressure today'
+            : currentDayMode === 'conferences'
+            ? '💜 Goals — survive the marathon'
+            : '📋 Today\'s Goals'}
           </Text>
           <Text style={styles.doneCount}>{doneCount} of {totalGoals} done</Text>
         </View>
