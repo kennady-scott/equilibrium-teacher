@@ -10,6 +10,7 @@ import HardDayCard from '../components/HardDayCard';
 import SubDayCard from '../components/SubDayCard';
 import SickDayCard from '../components/SickDayCard';
 import ConferencesCard from '../components/ConferencesCard';
+import TestingCard from '../components/TestingCard';
 import DayModeModal from '../components/DayModeModal';
 
 const MOODS = [
@@ -112,11 +113,13 @@ export default function HomeScreen() {
                  : currentDayMode === 'sub'           ? 'Rest up. I\'ll hold things down 🐹'
                  : currentDayMode === 'sick'          ? 'Feel better soon. I\'ve got you 🐹'
                  : currentDayMode === 'conferences'   ? 'Deep breath. You\'re doing great 💜'
+                 : currentDayMode === 'testing'       ? 'Your students are ready 🍫'
                  : baseState.msg;
   const msgColor = isHardDay                         ? '#5B8DB8'
                  : currentDayMode === 'sub'           ? '#5B9E8F'
                  : currentDayMode === 'sick'          ? '#D4696B'
                  : currentDayMode === 'conferences'   ? '#9B7AB8'
+                 : currentDayMode === 'testing'       ? '#D4854A'
                  : baseState.msgColor;
 
   const featuredGoals = goals.filter(g => g.featured).slice(0, 6).map(g => {
@@ -255,6 +258,9 @@ export default function HomeScreen() {
         {/* Conferences card */}
         {currentDayMode === 'conferences' && <ConferencesCard />}
 
+        {/* Testing Period card */}
+        {currentDayMode === 'testing' && <TestingCard />}
+
         {/* Goals — full width tiles */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
@@ -262,6 +268,8 @@ export default function HomeScreen() {
             ? '💛 Goals — no pressure today'
             : currentDayMode === 'conferences'
             ? '💜 Goals — survive the marathon'
+            : currentDayMode === 'testing'
+            ? '🧡 Goals — you\'ve already won'
             : '📋 Today\'s Goals'}
           </Text>
           <Text style={styles.doneCount}>{doneCount} of {totalGoals} done</Text>
