@@ -170,7 +170,7 @@ export default function HomeScreen() {
             </View>
             {/* Name — upper-left overlay */}
             <View style={styles.petNameOverlay}>
-              <Text style={styles.pippinName}>Pippin ✏️</Text>
+              <Text style={styles.pippinName}>Pippin</Text>
               <Text style={styles.pippinSubtitle}>
                 {petTrait ? petTrait.subtitle : 'Your little hamster'}
               </Text>
