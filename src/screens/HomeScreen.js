@@ -29,7 +29,7 @@ export default function HomeScreen() {
     getPetStats, getPetMood, getPetLevel, getPetTrait, getDayProgress, getWeekDays,
     isHardDay, markHardDay, clearHardDay,
     currentDayMode, setDayMode,
-    pippinBoost,
+    pippinBoost, triggerPippinCelebration,
   } = useApp();
 
   const [showDayMode, setShowDayMode] = useState(false);
@@ -193,6 +193,20 @@ export default function HomeScreen() {
               </View>
               <View style={styles.msgTail} />
             </View>
+            {/* Chocolate bubble — testing days only */}
+            {currentDayMode === 'testing' && (
+              <TouchableOpacity
+                style={styles.chocBubble}
+                onPress={triggerPippinCelebration}
+                activeOpacity={0.7}
+              >
+                <View style={styles.chocSpeech}>
+                  <Text style={styles.chocSpeechText}>I heard we're testing today. I brought some chocolates for us to share 🍫</Text>
+                </View>
+                <View style={styles.chocSpeechTail} />
+                <Text style={styles.chocIcon}>🍫</Text>
+              </TouchableOpacity>
+            )}
           </View>
           {/* Stats bar — right below the habitat image */}
           <View style={styles.statsRow}>
@@ -270,7 +284,7 @@ export default function HomeScreen() {
             : currentDayMode === 'conferences'
             ? '💜 Goals — survive the marathon'
             : currentDayMode === 'testing'
-            ? '🧡 Goals — you\'ve already won'
+            ? '🧡 Testing Days — you\'ve already won'
             : '📋 Today\'s Goals'}
           </Text>
           <Text style={styles.doneCount}>{doneCount} of {totalGoals} done</Text>
@@ -475,4 +489,11 @@ const styles = StyleSheet.create({
   skipText: { color: '#AAAAAA', fontSize: 14 },
   hardDayBtn: { marginTop: 4, paddingVertical: 10, paddingHorizontal: 22, borderRadius: 20, backgroundColor: '#EBF2FA', borderWidth: 1.5, borderColor: '#5B8DB8' },
   hardDayBtnText: { fontSize: 14, fontWeight: '700', color: '#5B8DB8' },
+
+  // Chocolate bubble (testing days)
+  chocBubble: { position: 'absolute', right: 12, top: 60, alignItems: 'flex-end' },
+  chocSpeech: { backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 14, padding: 10, maxWidth: 160, borderWidth: 1.5, borderColor: '#FADEC8' },
+  chocSpeechText: { fontSize: 12, color: '#8A4820', fontWeight: '600', lineHeight: 17 },
+  chocSpeechTail: { width: 0, height: 0, borderLeftWidth: 8, borderRightWidth: 0, borderTopWidth: 8, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: 'rgba(255,255,255,0.95)', alignSelf: 'flex-end', marginRight: 28, marginTop: -1 },
+  chocIcon: { fontSize: 36, marginTop: 4, alignSelf: 'flex-end', marginRight: 8 },
 });

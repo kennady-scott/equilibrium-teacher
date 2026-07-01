@@ -29,7 +29,7 @@ const MODES = [
   {
     id: 'testing',
     emoji: '📝',
-    label: 'Testing Period',
+    label: 'Testing Days',
     desc: 'Keep calm & carry on',
     color: '#E8A87C',
     bg: '#FDF3EC',
