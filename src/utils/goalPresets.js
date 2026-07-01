@@ -1,0 +1,16 @@
+export const GOAL_PRESETS = [
+  { id: 'lunch',      title: 'Healthy lunch',                    emoji: '🥗', petStat: 'hunger', petEmoji: '🍎', target: 5 },
+  { id: 'walk',       title: 'Walk break during the day',        emoji: '🚶', petStat: 'energy', petEmoji: '⚡', target: 3 },
+  { id: 'breathing',  title: 'Deep breathing or meditation',     emoji: '🌿', petStat: 'calm',   petEmoji: '😊', target: 3 },
+  { id: 'exercise',   title: 'Exercise',                         emoji: '💪', petStat: 'energy', petEmoji: '⚡', target: 3 },
+  { id: 'leave',      title: 'Leave school at contract time',    emoji: '🏫', petStat: 'calm',   petEmoji: '😊', target: 5 },
+  { id: 'noemails',   title: 'No work emails after 6pm',         emoji: '📵', petStat: 'calm',   petEmoji: '😊', target: 5 },
+  { id: 'outside',    title: 'Go outside at lunch',              emoji: '☀️', petStat: 'energy', petEmoji: '⚡', target: 3 },
+  { id: 'yoga',       title: 'Stretch or yoga',                  emoji: '🧘', petStat: 'calm',   petEmoji: '😊', target: 3 },
+  { id: 'screen',     title: 'Screen free evening',              emoji: '🌙', petStat: 'calm',   petEmoji: '😊', target: 3 },
+  { id: 'read',       title: 'Read for pleasure',                emoji: '📚', petStat: 'calm',   petEmoji: '😊', target: 3 },
+  { id: 'call',       title: 'Call a friend or family member',   emoji: '📞', petStat: 'calm',   petEmoji: '😊', target: 2 },
+  { id: 'mindful',    title: 'Mindful moment',                   emoji: '🧠', petStat: 'calm',   petEmoji: '😊', target: 3 },
+  { id: 'learn',      title: 'Learn something new',              emoji: '🌱', petStat: 'calm',   petEmoji: '😊', target: 2 },
+  { id: 'kindness',   title: 'Act of self-kindness',             emoji: '💝', petStat: 'calm',   petEmoji: '😊', target: 3 },
+];
