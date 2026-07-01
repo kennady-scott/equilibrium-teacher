@@ -71,6 +71,7 @@ export function AppProvider({ children }) {
     const now = new Date();
     const dow = now.getDay(); // 0=Sun, 6=Sat
     if (dow === 0 || dow === 6) return; // weekends don't count
+    if (currentDayMode === 'sick' || currentDayMode === 'sub') return; // sick/sub days don't count
 
     const today = now.toDateString();
     if (streak.days[today]) return; // already counted

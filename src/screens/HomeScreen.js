@@ -8,6 +8,7 @@ import PippinCharacter from '../components/PippinCharacter';
 import PippinHabitat from '../components/PippinHabitat';
 import HardDayCard from '../components/HardDayCard';
 import SubDayCard from '../components/SubDayCard';
+import SickDayCard from '../components/SickDayCard';
 import DayModeModal from '../components/DayModeModal';
 
 const MOODS = [
@@ -105,11 +106,13 @@ export default function HomeScreen() {
   };
   const baseState = petStateMap[petMood];
   const { bg } = baseState;
-  const msg      = isHardDay           ? "I'm right here with you 💙"
-                 : currentDayMode === 'sub' ? 'Rest up. I\'ll hold things down 🐹'
+  const msg      = isHardDay                ? "I'm right here with you 💙"
+                 : currentDayMode === 'sub'  ? 'Rest up. I\'ll hold things down 🐹'
+                 : currentDayMode === 'sick' ? 'Feel better soon. I\'ve got you 🐹'
                  : baseState.msg;
-  const msgColor = isHardDay           ? '#5B8DB8'
-                 : currentDayMode === 'sub' ? '#5B9E8F'
+  const msgColor = isHardDay                ? '#5B8DB8'
+                 : currentDayMode === 'sub'  ? '#5B9E8F'
+                 : currentDayMode === 'sick' ? '#D4696B'
                  : baseState.msgColor;
 
   const featuredGoals = goals.filter(g => g.featured).slice(0, 6).map(g => {
@@ -171,7 +174,7 @@ export default function HomeScreen() {
             </View>
             <View style={styles.stageWrap}>
               <Animated.View style={{ transform: [{ rotate: wiggle.interpolate({ inputRange: [-10, 10], outputRange: ['-10deg', '10deg'] }) }] }}>
-                <PippinCharacter mood={petMood} dayState={isHardDay ? 'awake' : currentDayMode === 'sub' ? 'happy' : dayProgress.state} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
+                <PippinCharacter mood={petMood} dayState={isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
               </Animated.View>
             </View>
             {/* Message bubble — lower-left inside habitat */}
@@ -242,10 +245,13 @@ export default function HomeScreen() {
         {/* Sub Day card */}
         {currentDayMode === 'sub' && <SubDayCard />}
 
+        {/* Sick Day card */}
+        {currentDayMode === 'sick' && <SickDayCard />}
+
         {/* Goals — full width tiles */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
-            {currentDayMode === 'sub' ? '💛 Goals — no pressure today' : '📋 Today\'s Goals'}
+            {currentDayMode === 'sub' || currentDayMode === 'sick' ? '💛 Goals — no pressure today' : '📋 Today\'s Goals'}
           </Text>
           <Text style={styles.doneCount}>{doneCount} of {totalGoals} done</Text>
         </View>

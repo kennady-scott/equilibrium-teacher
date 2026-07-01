@@ -59,6 +59,19 @@ export default function DayModeModal({ visible, onSelect }) {
               </TouchableOpacity>
             ))}
           </View>
+
+          {/* Sick Day — full-width bar */}
+          <TouchableOpacity
+            style={styles.sickBar}
+            onPress={() => onSelect('sick')}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.sickEmoji}>🤒</Text>
+            <View>
+              <Text style={styles.sickLabel}>Sick Day</Text>
+              <Text style={styles.sickDesc}>Rest up — streak is safe, school can wait</Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -100,4 +113,21 @@ const styles = StyleSheet.create({
   tileEmoji: { fontSize: 28, marginBottom: 4 },
   tileLabel: { fontSize: 15, fontWeight: '800', textAlign: 'center' },
   tileDesc: { fontSize: 12, color: '#888', textAlign: 'center', lineHeight: 16 },
+
+  sickBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    width: '100%',
+    marginTop: 12,
+    backgroundColor: '#FDF0F0',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#D4696B',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  sickEmoji: { fontSize: 24 },
+  sickLabel: { fontSize: 14, fontWeight: '800', color: '#D4696B' },
+  sickDesc: { fontSize: 12, color: '#8B4040', marginTop: 1 },
 });
