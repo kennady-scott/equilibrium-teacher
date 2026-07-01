@@ -2,7 +2,23 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
+
+class ErrorBoundary extends React.Component {
+  state = { error: null };
+  static getDerivedStateFromError(e) { return { error: e }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: '#C62828', marginBottom: 12 }}>Something went wrong</Text>
+          <Text style={{ fontSize: 13, color: '#555', fontFamily: 'monospace' }}>{String(this.state.error)}</Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 import { AppProvider } from './src/context/AppContext';
 import HomeScreen from './src/screens/HomeScreen';
@@ -23,6 +39,7 @@ const ICONS = {
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <SafeAreaProvider>
       <AppProvider>
         <NavigationContainer>
@@ -54,5 +71,6 @@ export default function App() {
         </NavigationContainer>
       </AppProvider>
     </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
