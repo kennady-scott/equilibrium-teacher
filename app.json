@@ -6,16 +6,26 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F5F0EA"
+    },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.cleark12.equilibrium",
+      "buildNumber": "1",
+      "supportsTablet": false
     },
     "android": {
+      "package": "com.cleark12.equilibrium",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#F5F0EA",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png"

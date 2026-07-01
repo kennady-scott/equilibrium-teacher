@@ -5,6 +5,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Text, View, ActivityIndicator } from 'react-native';
 import { supabase } from './src/lib/supabase';
+import { initPurchases, getSubscriptionStatus } from './src/lib/purchases';
+import PaywallScreen from './src/screens/PaywallScreen';
 
 class ErrorBoundary extends React.Component {
   state = { error: null };
@@ -81,12 +83,25 @@ function AuthStack() {
 }
 
 export default function App() {
-  const [session, setSession]   = useState(undefined); // undefined = loading
+  const [session, setSession]       = useState(undefined); // undefined = loading
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        initPurchases(session.user.id);
+        getSubscriptionStatus().then(({ isActive }) => setIsSubscribed(isActive));
+      }
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) {
+        initPurchases(session.user.id);
+        getSubscriptionStatus().then(({ isActive }) => setIsSubscribed(isActive));
+      } else {
+        setIsSubscribed(false);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -104,11 +119,15 @@ export default function App() {
     <ErrorBoundary>
       <SafeAreaProvider>
         {session ? (
-          <AppProvider userId={session.user.id}>
-            <NavigationContainer>
-              <MainTabs />
-            </NavigationContainer>
-          </AppProvider>
+          isSubscribed ? (
+            <AppProvider userId={session.user.id}>
+              <NavigationContainer>
+                <MainTabs />
+              </NavigationContainer>
+            </AppProvider>
+          ) : (
+            <PaywallScreen onSubscribed={() => setIsSubscribed(true)} />
+          )
         ) : (
           <AuthStack />
         )}
