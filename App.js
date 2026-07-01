@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Text, View } from 'react-native';
+import { Text, View, ActivityIndicator } from 'react-native';
+import { supabase } from './src/lib/supabase';
 
 class ErrorBoundary extends React.Component {
   state = { error: null };
@@ -26,8 +28,11 @@ import GoalsScreen from './src/screens/GoalsScreen';
 import PetScreen from './src/screens/PetScreen';
 import JournalScreen from './src/screens/JournalScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SignInScreen from './src/screens/SignInScreen';
+import SignUpScreen from './src/screens/SignUpScreen';
 
-const Tab = createBottomTabNavigator();
+const Tab   = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 const ICONS = {
   Home: '🏠',
@@ -37,40 +42,77 @@ const ICONS = {
   Profile: '🏅',
 };
 
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused }) => (
+          <Text style={{ fontSize: focused ? 24 : 20 }}>{ICONS[route.name]}</Text>
+        ),
+        tabBarLabel: route.name,
+        tabBarActiveTintColor: '#7B9E87',
+        tabBarInactiveTintColor: '#AAAAAA',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopColor: '#F0EDE8',
+          paddingBottom: 6,
+          paddingTop: 6,
+          height: 64,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        headerShown: false,
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Goals" component={GoalsScreen} />
+      <Tab.Screen name="Pet" component={PetScreen} />
+      <Tab.Screen name="Journal" component={JournalScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+    </Tab.Navigator>
+  );
+}
+
+function AuthStack() {
+  const [screen, setScreen] = useState('SignIn');
+  if (screen === 'SignIn') {
+    return <SignInScreen onNavigateToSignUp={() => setScreen('SignUp')} />;
+  }
+  return <SignUpScreen onNavigateToSignIn={() => setScreen('SignIn')} />;
+}
+
 export default function App() {
+  const [session, setSession]   = useState(undefined); // undefined = loading
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (session === undefined) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F0EA' }}>
+        <Text style={{ fontSize: 56, marginBottom: 20 }}>🐹</Text>
+        <ActivityIndicator size="large" color="#7B9E87" />
+      </View>
+    );
+  }
+
   return (
     <ErrorBoundary>
-    <SafeAreaProvider>
-      <AppProvider>
-        <NavigationContainer>
-          <Tab.Navigator
-            screenOptions={({ route }) => ({
-              tabBarIcon: ({ focused }) => (
-                <Text style={{ fontSize: focused ? 24 : 20 }}>{ICONS[route.name]}</Text>
-              ),
-              tabBarLabel: route.name,
-              tabBarActiveTintColor: '#7B9E87',
-              tabBarInactiveTintColor: '#AAAAAA',
-              tabBarStyle: {
-                backgroundColor: '#fff',
-                borderTopColor: '#F0EDE8',
-                paddingBottom: 6,
-                paddingTop: 6,
-                height: 64,
-              },
-              tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-              headerShown: false,
-            })}
-          >
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Goals" component={GoalsScreen} />
-            <Tab.Screen name="Pet" component={PetScreen} />
-            <Tab.Screen name="Journal" component={JournalScreen} />
-            <Tab.Screen name="Profile" component={ProfileScreen} />
-          </Tab.Navigator>
-        </NavigationContainer>
-      </AppProvider>
-    </SafeAreaProvider>
+      <SafeAreaProvider>
+        {session ? (
+          <AppProvider userId={session.user.id}>
+            <NavigationContainer>
+              <MainTabs />
+            </NavigationContainer>
+          </AppProvider>
+        ) : (
+          <AuthStack />
+        )}
+      </SafeAreaProvider>
     </ErrorBoundary>
   );
 }

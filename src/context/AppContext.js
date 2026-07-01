@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
 
 const AppContext = createContext();
 
@@ -21,7 +22,7 @@ const defaultGoals = [
 
 const defaultPet = { name: 'Pippin', type: 'hamster' };
 
-export function AppProvider({ children }) {
+export function AppProvider({ children, userId }) {
   const [pet, setPet]                       = useState(defaultPet);
   const [hydration, setHydration]           = useState(0);
   const [goals, setGoals]                   = useState(defaultGoals);
@@ -34,36 +35,71 @@ export function AppProvider({ children }) {
   const [pippinBoost, setPippinBoostState]  = useState(null); // 'celebrating' | null — transient
   const [loaded, setLoaded]                 = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  const saveTimerRef = useRef(null);
+
+  useEffect(() => { loadData(); }, [userId]);
 
   async function loadData() {
     try {
-      const keys = ['pet', 'hydration', 'goals', 'journalEntries', 'streak', 'mood', 'energy', 'hardDay', 'dayMode'];
-      const results = await AsyncStorage.multiGet(keys);
-      const data = Object.fromEntries(results.map(([k, v]) => [k, v ? JSON.parse(v) : null]));
-      if (data.pet)             setPet(data.pet);
-      if (data.hydration != null) setHydration(data.hydration);
-      if (data.goals) {
-        // migrate: older goals without featured field default to featured=true
-        const migrated = data.goals.map((g, i) =>
-          g.featured === undefined ? { ...g, featured: i < 6 } : g
-        );
-        setGoals(migrated);
+      if (userId) {
+        // Load from Supabase
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (!error && data) {
+          if (data.hydration != null)    setHydration(data.hydration);
+          if (data.goals) {
+            const migrated = data.goals.map((g, i) =>
+              g.featured === undefined ? { ...g, featured: i < 6 } : g
+            );
+            setGoals(migrated);
+          }
+          if (data.journal_entries)     setJournalEntries(data.journal_entries);
+          if (data.streak)              setStreak(data.streak);
+          if (data.mood != null)        setMood(data.mood);
+          if (data.energy != null)      setEnergy(data.energy);
+          if (data.hard_day && data.hard_day === new Date().toDateString()) setHardDayState(data.hard_day);
+          if (data.day_mode && data.day_mode.date === new Date().toDateString()) setDayModeState(data.day_mode);
+        }
+      } else {
+        // Fallback: load from AsyncStorage (offline / unauthenticated)
+        const keys = ['hydration', 'goals', 'journalEntries', 'streak', 'mood', 'energy', 'hardDay', 'dayMode'];
+        const results = await AsyncStorage.multiGet(keys);
+        const data = Object.fromEntries(results.map(([k, v]) => [k, v ? JSON.parse(v) : null]));
+        if (data.hydration != null) setHydration(data.hydration);
+        if (data.goals) {
+          const migrated = data.goals.map((g, i) =>
+            g.featured === undefined ? { ...g, featured: i < 6 } : g
+          );
+          setGoals(migrated);
+        }
+        if (data.journalEntries)  setJournalEntries(data.journalEntries);
+        if (data.streak)          setStreak(data.streak);
+        if (data.mood != null)    setMood(data.mood);
+        if (data.energy != null)  setEnergy(data.energy);
+        if (data.hardDay && data.hardDay === new Date().toDateString()) setHardDayState(data.hardDay);
+        if (data.dayMode && data.dayMode.date === new Date().toDateString()) setDayModeState(data.dayMode);
       }
-      if (data.journalEntries)  setJournalEntries(data.journalEntries);
-      if (data.streak)          setStreak(data.streak);
-      if (data.mood != null)    setMood(data.mood);
-      if (data.energy != null)  setEnergy(data.energy);
-      // Hard day only persists for the day it was set
-      if (data.hardDay && data.hardDay === new Date().toDateString()) setHardDayState(data.hardDay);
-      // Day mode only persists for the day it was set
-      if (data.dayMode && data.dayMode.date === new Date().toDateString()) setDayModeState(data.dayMode);
     } catch (e) {}
     setLoaded(true);
   }
 
-  async function save(key, value) {
-    await AsyncStorage.setItem(key, JSON.stringify(value));
+  // Debounced save — batches rapid changes into one upsert every 800ms
+  function save(key, value) {
+    if (userId) {
+      const columnMap = { hydration: 'hydration', goals: 'goals', journalEntries: 'journal_entries', streak: 'streak', mood: 'mood', energy: 'energy', hardDay: 'hard_day', dayMode: 'day_mode' };
+      const col = columnMap[key];
+      if (!col) return;
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        supabase.from('profiles').upsert({ id: userId, [col]: value, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+      }, 800);
+    } else {
+      AsyncStorage.setItem(key, JSON.stringify(value));
+    }
   }
 
   // A day counts toward the streak once the teacher has hit their water
@@ -158,6 +194,10 @@ export function AppProvider({ children }) {
 
   function logMood(value) { setMood(value); save('mood', value); }
   function logEnergy(value) { setEnergy(value); save('energy', value); }
+
+  async function signOut() {
+    await supabase.auth.signOut();
+  }
 
   const boostTimerRef = useRef(null);
   function triggerPippinCelebration() {
@@ -298,7 +338,7 @@ export function AppProvider({ children }) {
       isHardDay, markHardDay, clearHardDay,
       currentDayMode, setDayMode,
       pippinBoost, triggerPippinCelebration,
-      MAX_FEATURED,
+      MAX_FEATURED, signOut,
     }}>
       {children}
     </AppContext.Provider>

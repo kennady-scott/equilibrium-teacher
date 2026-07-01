@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "equilibrium-web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["expo", "start", "--web", "--port", "8082"],
+      "port": 8082,
+      "cwd": "/private/tmp/claude-501/-Users-kennadyscott-Documents-Claude/016d919e-c6c7-4855-b84c-a39d0c2bc929/scratchpad/equilibrium"
+    }
+  ]
+}

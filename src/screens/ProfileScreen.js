@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useApp } from '../context/AppContext';
 
 const BADGES = [
@@ -16,7 +16,14 @@ const BADGES = [
 ];
 
 export default function ProfileScreen() {
-  const { streak, hydration, journalEntries, goals, mood } = useApp();
+  const { streak, hydration, journalEntries, goals, mood, signOut } = useApp();
+
+  function handleSignOut() {
+    Alert.alert('Sign out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign out', style: 'destructive', onPress: signOut },
+    ]);
+  }
 
   const totalCheckins = goals.reduce((sum, g) => sum + g.checkins.length, 0);
   const stats = {
@@ -88,6 +95,10 @@ export default function ProfileScreen() {
       <View style={styles.affirmCard}>
         <Text style={styles.affirmText}>"You can't pour from an empty cup — and every day you show up here, you're filling yours."</Text>
       </View>
+
+      <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut} activeOpacity={0.8}>
+        <Text style={styles.signOutText}>Sign out</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -112,6 +123,8 @@ const styles = StyleSheet.create({
   badgeEmoji: { fontSize: 32, marginBottom: 6 },
   badgeLabel: { fontSize: 13, fontWeight: '700', color: '#2D2D2D', textAlign: 'center' },
   badgeDesc: { fontSize: 11, color: '#9A9A9A', textAlign: 'center', marginTop: 4, lineHeight: 15 },
-  affirmCard: { backgroundColor: '#EEF6F2', borderRadius: 16, padding: 20 },
+  affirmCard: { backgroundColor: '#EEF6F2', borderRadius: 16, padding: 20, marginBottom: 20 },
   affirmText: { fontSize: 15, fontStyle: 'italic', color: '#4A7A5E', lineHeight: 24, textAlign: 'center' },
+  signOutBtn: { backgroundColor: '#fff', borderRadius: 14, paddingVertical: 16, alignItems: 'center', borderWidth: 1.5, borderColor: '#E8E0D8', marginBottom: 16 },
+  signOutText: { fontSize: 15, fontWeight: '700', color: '#C0392B' },
 });
