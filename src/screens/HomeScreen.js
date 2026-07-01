@@ -29,6 +29,7 @@ export default function HomeScreen() {
     getPetStats, getPetMood, getPetLevel, getPetTrait, getDayProgress, getWeekDays,
     isHardDay, markHardDay, clearHardDay,
     currentDayMode, setDayMode,
+    pippinBoost,
   } = useApp();
 
   const [showDayMode, setShowDayMode] = useState(false);
@@ -181,7 +182,7 @@ export default function HomeScreen() {
             </View>
             <View style={styles.stageWrap}>
               <Animated.View style={{ transform: [{ rotate: wiggle.interpolate({ inputRange: [-10, 10], outputRange: ['-10deg', '10deg'] }) }] }}>
-                <PippinCharacter mood={petMood} dayState={isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
+                <PippinCharacter mood={petMood} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
               </Animated.View>
             </View>
             {/* Message bubble — lower-left inside habitat */}

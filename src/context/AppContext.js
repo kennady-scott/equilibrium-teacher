@@ -31,6 +31,7 @@ export function AppProvider({ children }) {
   const [energy, setEnergy]                 = useState(null);
   const [hardDay, setHardDayState]          = useState(null); // stores date string when active
   const [dayMode, setDayModeState]          = useState(null); // { date, mode } — resets each day
+  const [pippinBoost, setPippinBoostState]  = useState(null); // 'celebrating' | null — transient
   const [loaded, setLoaded]                 = useState(false);
 
   useEffect(() => { loadData(); }, []);
@@ -157,6 +158,13 @@ export function AppProvider({ children }) {
 
   function logMood(value) { setMood(value); save('mood', value); }
   function logEnergy(value) { setEnergy(value); save('energy', value); }
+
+  const boostTimerRef = { current: null };
+  function triggerPippinCelebration() {
+    if (boostTimerRef.current) clearTimeout(boostTimerRef.current);
+    setPippinBoostState('celebrating');
+    boostTimerRef.current = setTimeout(() => setPippinBoostState(null), 3000);
+  }
 
   function setDayMode(mode) {
     const val = { date: new Date().toDateString(), mode };
@@ -289,6 +297,7 @@ export function AppProvider({ children }) {
       getPetStats, getPetMood, getPetLevel, getPetTrait, getDayProgress, getWeekDays,
       isHardDay, markHardDay, clearHardDay,
       currentDayMode, setDayMode,
+      pippinBoost, triggerPippinCelebration,
       MAX_FEATURED,
     }}>
       {children}

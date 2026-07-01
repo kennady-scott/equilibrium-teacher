@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from 'react-native';
+import { useApp } from '../context/AppContext';
 
 const ORANGE       = '#D4854A';
 const ORANGE_LIGHT = '#FDF3EC';
@@ -72,6 +73,7 @@ const CHOCOLATE_REACTIONS = [
 ];
 
 export default function TestingCard() {
+  const { triggerPippinCelebration } = useApp();
   const [activePack, setActivePack]       = useState('affirm');
   const [affirmIndex, setAffirmIndex]     = useState(0);
   const [chocolates, setChocolates]       = useState(0);
@@ -86,6 +88,9 @@ export default function TestingCard() {
     setChocolates(next);
     const reactionIdx = Math.min(Math.floor((next - 1) / 2), CHOCOLATE_REACTIONS.length - 1);
     setLastReaction(CHOCOLATE_REACTIONS[reactionIdx]);
+
+    // Wake up and dance the real Pippin on the home screen
+    triggerPippinCelebration();
 
     // Pippin bounce
     Animated.sequence([
