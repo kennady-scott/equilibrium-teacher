@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AppContext = createContext();
@@ -272,7 +273,12 @@ export function AppProvider({ children }) {
     });
   }
 
-  if (!loaded) return null;
+  if (!loaded) return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0EA' }}>
+      <Text style={{ fontSize: 40 }}>🐹</Text>
+      <Text style={{ fontSize: 16, color: '#7A9C7A', marginTop: 12 }}>Loading Pippin...</Text>
+    </View>
+  );
 
   return (
     <AppContext.Provider value={{
