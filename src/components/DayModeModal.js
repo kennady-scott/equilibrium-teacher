@@ -36,6 +36,12 @@ const MODES = [
   },
 ];
 
+// Metadata for every selectable day type, keyed by id (includes Sick Day).
+export const DAY_MODE_META = {
+  ...Object.fromEntries(MODES.map(m => [m.id, m])),
+  sick: { id: 'sick', emoji: '🤒', label: 'Sick Day', desc: 'Rest up — streak is safe', color: '#D4696B', bg: '#FBEDED' },
+};
+
 export default function DayModeModal({ visible, onSelect }) {
   return (
     <Modal visible={visible} transparent animationType="fade">

@@ -11,7 +11,7 @@ import SubDayCard from '../components/SubDayCard';
 import SickDayCard from '../components/SickDayCard';
 import ConferencesCard from '../components/ConferencesCard';
 import TestingCard from '../components/TestingCard';
-import DayModeModal from '../components/DayModeModal';
+import DayModeModal, { DAY_MODE_META } from '../components/DayModeModal';
 
 const MOODS = [
   { emoji: '😄', label: 'Great',       color: '#FFD166' },
@@ -35,15 +35,19 @@ export default function HomeScreen() {
   const [showDayMode, setShowDayMode] = useState(false);
   const [showMoodPrompt, setShowMoodPrompt] = useState(false);
 
-  // After AppContext hydrates from AsyncStorage, show the right modal
+  // Auto-prompt once per app open: ask for the day type if none is set yet,
+  // otherwise nudge for mood. Runs a single time so re-selecting a day type
+  // later (via the header pill) never re-triggers or races with this.
+  const autoPromptedRef = useRef(false);
   useEffect(() => {
-    if (currentDayMode) {
-      setShowDayMode(false); // already picked today — close it if it opened early
-      if (mood === null) setShowMoodPrompt(true);
-    } else {
+    if (autoPromptedRef.current) return;
+    autoPromptedRef.current = true;
+    if (!currentDayMode) {
       setShowDayMode(true);
+    } else if (mood === null) {
+      setShowMoodPrompt(true);
     }
-  }, [currentDayMode]);
+  }, [currentDayMode, mood]);
   const [habitatWidth, setHabitatWidth] = useState(340);
 
   const petMood  = getPetMood();
@@ -94,8 +98,8 @@ export default function HomeScreen() {
   function handleDayModeSelect(mode) {
     setDayMode(mode);
     setShowDayMode(false);
-    // After picking day mode, show mood prompt
-    setShowMoodPrompt(true);
+    // Prompt for mood only on the first pick of the day, not on later changes
+    if (mood === null) setShowMoodPrompt(true);
   }
 
   function handleMoodSelect(i) {
@@ -178,9 +182,24 @@ export default function HomeScreen() {
             <Text style={styles.nameLine}>Kennady ☀️</Text>
             <Text style={styles.tagline}>Let's protect your peace today.</Text>
           </View>
-          <TouchableOpacity style={styles.avatar} onPress={() => setShowMoodPrompt(true)}>
-            <Text style={{ fontSize: mood !== null ? 22 : 20 }}>{mood !== null ? MOODS[mood].emoji : '🌿'}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            {currentDayMode && DAY_MODE_META[currentDayMode] && (
+              <TouchableOpacity
+                style={[styles.dayModePill, { backgroundColor: DAY_MODE_META[currentDayMode].bg }]}
+                onPress={() => setShowDayMode(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.dayModePillEmoji}>{DAY_MODE_META[currentDayMode].emoji}</Text>
+                <Text style={[styles.dayModePillText, { color: DAY_MODE_META[currentDayMode].color }]} numberOfLines={1}>
+                  {DAY_MODE_META[currentDayMode].label}
+                </Text>
+                <Text style={styles.dayModePillArrow}>↻</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.avatar} onPress={() => setShowMoodPrompt(true)}>
+              <Text style={{ fontSize: mood !== null ? 22 : 20 }}>{mood !== null ? MOODS[mood].emoji : '🌿'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Pippin Card */}
@@ -414,6 +433,11 @@ const styles = StyleSheet.create({
   nameLine: { fontSize: 26, fontWeight: '800', color: '#2A3E2A', lineHeight: 32 },
   tagline: { fontSize: 13, color: '#8A9E8A', marginTop: 2 },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#E0EDD8', alignItems: 'center', justifyContent: 'center' },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dayModePill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 16, maxWidth: 150 },
+  dayModePillEmoji: { fontSize: 14 },
+  dayModePillText: { fontSize: 12, fontWeight: '700', flexShrink: 1 },
+  dayModePillArrow: { fontSize: 14, fontWeight: '800', color: '#8A9E8A', marginLeft: 1 },
 
   // Pet card
   petCard: { borderRadius: 20, marginBottom: 16, overflow: 'hidden', backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
