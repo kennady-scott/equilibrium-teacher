@@ -22,8 +22,9 @@ const defaultGoals = [
 
 const defaultPet = { name: 'Pippin', type: 'hamster' };
 
-export function AppProvider({ children, userId }) {
+export function AppProvider({ children, userId, user }) {
   const [pet, setPet]                       = useState(defaultPet);
+  const [name, setName]                     = useState(user?.user_metadata?.first_name || '');
   const [hydration, setHydration]           = useState(0);
   const [goals, setGoals]                   = useState(defaultGoals);
   const [journalEntries, setJournalEntries] = useState([]);
@@ -208,6 +209,12 @@ export function AppProvider({ children, userId }) {
   function logMood(value) { setMood(value); save('mood', value); }
   function logEnergy(value) { setEnergy(value); save('energy', value); }
 
+  async function updateName(newName) {
+    const trimmed = newName.trim();
+    setName(trimmed);
+    await supabase.auth.updateUser({ data: { first_name: trimmed } });
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
   }
@@ -346,8 +353,8 @@ export function AppProvider({ children, userId }) {
 
   return (
     <AppContext.Provider value={{
-      pet, hydration, goals, journalEntries, streak, mood, energy,
-      updateHydration, checkInGoal, addGoal, removeGoal, toggleFeatured,
+      pet, name, hydration, goals, journalEntries, streak, mood, energy,
+      updateName, updateHydration, checkInGoal, addGoal, removeGoal, toggleFeatured,
       updateGoalTitle, updateGoalTarget, addJournalEntry, logMood, logEnergy,
       getPetStats, getPetMood, getPetLevel, getPetTrait, getDayProgress, getWeekDays,
       isHardDay, markHardDay, clearHardDay,

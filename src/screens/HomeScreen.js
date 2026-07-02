@@ -24,7 +24,7 @@ const MOODS = [
 
 export default function HomeScreen() {
   const {
-    hydration, goals, streak, mood,
+    name, hydration, goals, streak, mood,
     updateHydration, checkInGoal, logMood,
     getPetStats, getPetMood, getPetLevel, getPetTrait, getDayProgress, getWeekDays,
     isHardDay, markHardDay, clearHardDay,
@@ -179,7 +179,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greetingLine}>{greeting}</Text>
-            <Text style={styles.nameLine}>Kennady ☀️</Text>
+            <Text style={styles.nameLine}>{name ? `${name} ☀️` : '☀️'}</Text>
             <Text style={styles.tagline}>Let's protect your peace today.</Text>
           </View>
           <View style={styles.headerRight}>

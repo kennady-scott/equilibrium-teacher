@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { useApp } from '../context/AppContext';
 
 const BADGES = [
@@ -16,7 +16,18 @@ const BADGES = [
 ];
 
 export default function ProfileScreen() {
-  const { streak, hydration, journalEntries, goals, mood, signOut } = useApp();
+  const { name, updateName, streak, hydration, journalEntries, goals, mood, signOut } = useApp();
+
+  const [nameDraft, setNameDraft] = useState(name);
+  const [savedFlash, setSavedFlash] = useState(false);
+
+  function handleSaveName() {
+    const trimmed = nameDraft.trim();
+    if (!trimmed || trimmed === name) return;
+    updateName(trimmed);
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 1800);
+  }
 
   function handleSignOut() {
     Alert.alert('Sign out', 'Are you sure you want to sign out?', [
@@ -41,6 +52,29 @@ export default function ProfileScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Your Journey</Text>
       <Text style={styles.subtitle}>Every small step counts.</Text>
+
+      {/* Name */}
+      <Text style={styles.sectionLabel}>Your Name</Text>
+      <View style={styles.nameCard}>
+        <TextInput
+          style={styles.nameInput}
+          value={nameDraft}
+          onChangeText={setNameDraft}
+          onBlur={handleSaveName}
+          onSubmitEditing={handleSaveName}
+          placeholder="Enter your name"
+          placeholderTextColor="#B8B8B8"
+          returnKeyType="done"
+          maxLength={40}
+        />
+        <TouchableOpacity
+          style={[styles.nameSaveBtn, (!nameDraft.trim() || nameDraft.trim() === name) && { opacity: 0.4 }]}
+          onPress={handleSaveName}
+          disabled={!nameDraft.trim() || nameDraft.trim() === name}
+        >
+          <Text style={styles.nameSaveText}>{savedFlash ? 'Saved ✓' : 'Save'}</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Summary */}
       <View style={styles.summaryCard}>
@@ -108,6 +142,10 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: '700', color: '#2D2D2D' },
   subtitle: { fontSize: 15, color: '#9A9A9A', marginBottom: 20 },
+  nameCard: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 },
+  nameInput: { flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16, color: '#2D2D2D', borderWidth: 1.5, borderColor: '#E8E0D8' },
+  nameSaveBtn: { backgroundColor: '#7B9E87', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 12, alignItems: 'center' },
+  nameSaveText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   summaryCard: { backgroundColor: '#7B9E87', borderRadius: 20, padding: 20, flexDirection: 'row', marginBottom: 24 },
   summaryItem: { flex: 1, alignItems: 'center' },
   summaryNum: { fontSize: 28, fontWeight: '800', color: '#fff' },

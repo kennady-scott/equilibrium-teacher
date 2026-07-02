@@ -120,7 +120,7 @@ export default function App() {
       <SafeAreaProvider>
         {session ? (
           isSubscribed ? (
-            <AppProvider userId={session.user.id}>
+            <AppProvider userId={session.user.id} user={session.user}>
               <NavigationContainer>
                 <MainTabs />
               </NavigationContainer>
