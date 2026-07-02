@@ -10,11 +10,24 @@ const AnimatedG = Animated.createAnimatedComponent(G);
 
 // dayState overrides mood when provided:
 //   'sleeping' | 'tired' | 'awake' | 'happy' | 'celebrating'
+// behavior (from the teacher's logged mood + energy) layers motion on top:
+//   'run'   — zoomies back and forth across the habitat
+//   'play'  — happy bouncing in place
+//   'rest'  — drowsy sway
+//   'sleep' — lies down and naps
 // mood (fallback for PetScreen etc.): 'happy' | 'okay' | 'sad'
-export default function PippinCharacter({ mood = 'okay', dayState = null, size = 200, critical = false }) {
+const BEHAVIOR_STATE = { run: 'happy', play: 'happy', rest: 'tired', sleep: 'sleeping' };
 
-  // Resolve which visual state to render
-  const state = dayState ?? (mood === 'happy' ? 'happy' : mood === 'okay' ? 'awake' : 'tired');
+export default function PippinCharacter({ mood = 'okay', dayState = null, behavior = null, size = 200, critical = false }) {
+
+  // Resolve which visual state to render. Celebrating always wins; otherwise
+  // a behavior picks the face/pose, then dayState, then mood.
+  const state = dayState === 'celebrating' ? 'celebrating'
+    : (behavior && BEHAVIOR_STATE[behavior])
+    ?? dayState
+    ?? (mood === 'happy' ? 'happy' : mood === 'okay' ? 'awake' : 'tired');
+  const isRunning  = behavior === 'run' && state === 'happy';
+  const isLying    = behavior === 'sleep' && state === 'sleeping';
   const isAsleep      = state === 'sleeping';
   const isTired       = state === 'tired';
   const isAwake       = state === 'awake';
@@ -29,17 +42,43 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, size =
   const zFloat     = useRef(new Animated.Value(0)).current;
   const cheekPulse = useRef(new Animated.Value(1)).current;
   const heartFloat = useRef(new Animated.Value(0)).current;
+  const runX       = useRef(new Animated.Value(0)).current;
+  const faceDir    = useRef(new Animated.Value(1)).current;
+  const lieDown    = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     bodyBob.stopAnimation();
     blinkTimer.stopAnimation();
     sparkle.stopAnimation();
     sway.stopAnimation();
+    sway.setValue(0);
     zFloat.stopAnimation();
     cheekPulse.stopAnimation();
     heartFloat.stopAnimation();
+    runX.stopAnimation();
+    faceDir.stopAnimation();
+    runX.setValue(0);
+    faceDir.setValue(1);
 
-    if (isHappy) {
+    // Ease into / out of the lying-down nap pose
+    Animated.timing(lieDown, { toValue: isLying ? 1 : 0, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }).start();
+
+    if (isRunning) {
+      // Zoomies: scamper right, flip around, scamper left, flip back — with quick little hops
+      const dist = size * 0.35;
+      Animated.loop(Animated.sequence([
+        Animated.timing(runX, { toValue: dist,  duration: 1300, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(faceDir, { toValue: -1, duration: 150, useNativeDriver: true }),
+        Animated.timing(runX, { toValue: -dist, duration: 2600, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(faceDir, { toValue: 1,  duration: 150, useNativeDriver: true }),
+        Animated.timing(runX, { toValue: 0,     duration: 1300, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      ])).start();
+      Animated.loop(Animated.sequence([
+        Animated.timing(bodyBob, { toValue: -7, duration: 160, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(bodyBob, { toValue: 0,  duration: 160, easing: Easing.in(Easing.quad),  useNativeDriver: true }),
+      ])).start();
+      Animated.loop(Animated.timing(sparkle, { toValue: 1, duration: 2000, easing: Easing.linear, useNativeDriver: true })).start();
+    } else if (isHappy) {
       Animated.loop(Animated.sequence([
         Animated.timing(bodyBob, { toValue: -12, duration: 400, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
         Animated.timing(bodyBob, { toValue: 0,   duration: 400, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
@@ -91,7 +130,7 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, size =
         Animated.timing(blinkTimer, { toValue: 1, duration: 80, useNativeDriver: true }),
       ])).start();
     }
-  }, [state]);
+  }, [state, behavior]);
 
   // Colors
   const furColor   = isHappy ? '#E8A87C' : isAwake ? '#D4956A' : '#B8A090';
@@ -112,7 +151,10 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, size =
     <View style={{ width: size, height: size * 1.1, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View style={{
         transform: [
-          { translateY: bodyBob },
+          { translateX: runX },
+          { translateY: Animated.add(bodyBob, lieDown.interpolate({ inputRange: [0, 1], outputRange: [0, size * 0.12] })) },
+          { scaleX: faceDir },
+          { rotate: lieDown.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '80deg'] }) },
           { rotate: sway.interpolate({ inputRange: [-6, 6], outputRange: ['-6deg', '6deg'] }) },
         ]
       }}>

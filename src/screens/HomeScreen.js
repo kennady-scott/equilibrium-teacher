@@ -165,6 +165,18 @@ export default function HomeScreen() {
   const isCritical = petStats.overall < 5 && !hasRecentActivity && streak.count > 0;
   const moodLabel    = mood !== null ? MOODS[mood]?.label : '—';
   const energyPct    = `${petStats.energy}%`;
+  // Pippin's behavior mirrors the teacher's day: mood indices are
+  // 0 Great, 1 Okay, 2 Tired, 3 Stressed, 4 Overwhelmed, 5 Grateful.
+  const goodMood = mood === 0 || mood === 5;
+  const lowMood  = mood === 2 || mood === 3 || mood === 4;
+  const behaviorAllowed = !pippinBoost && !isHardDay && currentDayMode !== 'sub' && currentDayMode !== 'sick';
+  const pippinBehavior = !behaviorAllowed ? null
+    : lowMood && petStats.energy < 30 ? 'sleep'
+    : lowMood                          ? 'rest'
+    : goodMood && petStats.energy >= 60 ? 'run'
+    : mood !== null && petStats.energy >= 30 ? 'play'
+    : null;
+
   const petLevel     = getPetLevel();
   const petTrait     = getPetTrait();
   const dayProgress  = getDayProgress();
@@ -223,7 +235,7 @@ export default function HomeScreen() {
             </View>
             <View style={styles.stageWrap}>
               <Animated.View style={{ transform: [{ rotate: wiggle.interpolate({ inputRange: [-10, 10], outputRange: ['-10deg', '10deg'] }) }] }}>
-                <PippinCharacter mood={petMood} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
+                <PippinCharacter mood={petMood} behavior={pippinBehavior} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
               </Animated.View>
             </View>
             {/* Message bubble — lower-left inside habitat */}
