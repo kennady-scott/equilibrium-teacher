@@ -13,6 +13,7 @@ import ConferencesCard from '../components/ConferencesCard';
 import TestingCard from '../components/TestingCard';
 import DayModeModal, { DAY_MODE_META } from '../components/DayModeModal';
 import WaterBottle from '../components/WaterBottle';
+import PippinAction, { sceneForGoal } from '../components/PippinAction';
 
 const MOODS = [
   { emoji: '😄', label: 'Great',       color: '#FFD166' },
@@ -51,6 +52,7 @@ export default function HomeScreen() {
   }, [currentDayMode, mood]);
   const [habitatWidth, setHabitatWidth] = useState(340);
   const [bottleKey, setBottleKey] = useState(null);
+  const [goalAction, setGoalAction] = useState(null); // { scene, key }
 
   const petMood  = getPetMood();
   const petStats = getPetStats();
@@ -89,6 +91,8 @@ export default function HomeScreen() {
   function handleGoal(goalId) {
     checkInGoal(goalId);
     triggerWiggle();
+    // Pippin acts out the goal that was just checked in
+    setGoalAction({ scene: sceneForGoal(goalId), key: Date.now() });
   }
 
   function handleHydration(i) {
@@ -240,7 +244,11 @@ export default function HomeScreen() {
             </View>
             <View style={styles.stageWrap}>
               <Animated.View style={{ transform: [{ rotate: wiggle.interpolate({ inputRange: [-10, 10], outputRange: ['-10deg', '10deg'] }) }] }}>
-                <PippinCharacter mood={petMood} behavior={pippinBehavior} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
+                {goalAction ? (
+                  <PippinAction key={goalAction.key} scene={goalAction.scene} size={170} onDone={() => setGoalAction(null)} />
+                ) : (
+                  <PippinCharacter mood={petMood} behavior={pippinBehavior} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
+                )}
               </Animated.View>
             </View>
             {/* Water bottle — appears when the teacher logs a cup */}
