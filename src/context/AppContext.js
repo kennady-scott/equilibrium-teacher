@@ -246,11 +246,13 @@ export function AppProvider({ children, userId }) {
       return g ? g.checkins.filter(d => (new Date() - new Date(d)) / 86400000 <= 7).length : 0;
     };
 
-    const walkGoal  = goals.find(g => g.petStat === 'energy');
     const lunchGoal = goals.find(g => g.petStat === 'hunger');
     const calmGoal  = goals.find(g => g.petStat === 'calm');
 
-    const energyPct  = walkGoal  ? Math.min(100, Math.round((weekCheckins(walkGoal.id)  / walkGoal.target)  * 100)) : 0;
+    // Energy reflects today's activity: every cup of water is +5% and every
+    // goal check-in is +10%, capped at 100%. Resets fresh each day.
+    const goalCheckinsToday = goals.filter(g => g.checkins.includes(today)).length;
+    const energyPct  = Math.min(100, hydration * 5 + goalCheckinsToday * 10);
     const hungerPct  = lunchGoal ? Math.min(100, Math.round((weekCheckins(lunchGoal.id) / lunchGoal.target) * 100)) : 0;
     const calmBase   = calmGoal  ? Math.min(100, Math.round((weekCheckins(calmGoal.id)  / calmGoal.target)  * 100)) : 0;
     const moodBonus  = mood !== null ? Math.round((mood / 5) * 40) : 0;
