@@ -32,16 +32,6 @@
     </noscript>
     <!-- The root element for your Expo app. -->
     <div id="root"></div>
-  <script>
-    window.onerror = function(msg, src, line, col, err) {
-      document.body.style.background = '#fff';
-      document.body.innerHTML = '<div style="padding:24px;font-family:monospace;color:#c00"><h2>JS Error</h2><p>' + msg + '</p><pre>' + (err && err.stack ? err.stack : '') + '</pre></div>';
-    };
-    window.addEventListener('unhandledrejection', function(e) {
-      document.body.style.background = '#fff';
-      document.body.innerHTML = '<div style="padding:24px;font-family:monospace;color:#c00"><h2>Unhandled Promise</h2><pre>' + e.reason + '</pre></div>';
-    });
-  </script>
-  <script src="/_expo/static/js/web/index-188b884aa197679be03d2a0e6ab86256.js" defer></script>
+  <script src="/_expo/static/js/web/index-ff7b8a7c13432980b7ca893deb467fb9.js" defer></script>
 </body>
 </html>

@@ -7,27 +7,38 @@ import { useApp } from '../context/AppContext';
 import { GOAL_PRESETS } from '../utils/goalPresets';
 
 export default function GoalsScreen() {
-  const { goals, checkInGoal, addGoal, removeGoal, toggleFeatured, updateGoalTitle, MAX_FEATURED } = useApp();
+  const { goals, checkInGoal, addGoal, removeGoal, toggleFeatured, updateGoalTitle, updateGoalTarget, MAX_FEATURED } = useApp();
 
   const [showPicker, setShowPicker]       = useState(false);
   const [showCustom, setShowCustom]       = useState(false);
   const [customTitle, setCustomTitle]     = useState('');
-  const [editingGoal, setEditingGoal]     = useState(null); // { id, title }
+  const [customTarget, setCustomTarget]   = useState(3);
+  const [pendingPreset, setPendingPreset] = useState(null); // preset awaiting frequency choice
+  const [editingGoal, setEditingGoal]     = useState(null); // { id, title, target }
   const [editTitle, setEditTitle]         = useState('');
+  const [editTarget, setEditTarget]       = useState(3);
 
   const today         = new Date().toDateString();
   const featuredCount = goals.filter(g => g.featured).length;
   const addedIds      = new Set(goals.map(g => g.id));
 
-  function handleAddPreset(preset) {
-    addGoal(preset);
+  function handlePickPreset(preset) {
+    setPendingPreset({ ...preset, chosenTarget: preset.target || 3 });
+  }
+
+  function handleConfirmPreset() {
+    if (!pendingPreset) return;
+    const { chosenTarget, ...preset } = pendingPreset;
+    addGoal(preset, null, chosenTarget);
+    setPendingPreset(null);
     setShowPicker(false);
   }
 
   function handleAddCustom() {
     if (!customTitle.trim()) return;
-    addGoal({ id: Date.now().toString(), emoji: '✏️', petStat: 'calm', petEmoji: '😊', target: 3 }, customTitle.trim());
+    addGoal({ id: Date.now().toString(), emoji: '✏️', petStat: 'calm', petEmoji: '😊' }, customTitle.trim(), customTarget);
     setCustomTitle('');
+    setCustomTarget(3);
     setShowCustom(false);
   }
 
@@ -38,7 +49,28 @@ export default function GoalsScreen() {
   function handleEditSave() {
     if (!editTitle.trim() || !editingGoal) return;
     updateGoalTitle(editingGoal.id, editTitle.trim());
+    updateGoalTarget(editingGoal.id, editTarget);
     setEditingGoal(null);
+  }
+
+  // Reusable 1–7 times-per-week selector
+  function FrequencyPicker({ value, onChange }) {
+    return (
+      <View>
+        <Text style={styles.freqLabel}>How many times per week?</Text>
+        <View style={styles.freqRow}>
+          {[1, 2, 3, 4, 5, 6, 7].map(n => (
+            <TouchableOpacity
+              key={n}
+              style={[styles.freqChip, value === n && styles.freqChipOn]}
+              onPress={() => onChange(n)}
+            >
+              <Text style={[styles.freqChipText, value === n && styles.freqChipTextOn]}>{n}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    );
   }
 
   const STAT_COLORS = { calm: '#C8E6C9', energy: '#FFF9C4', hunger: '#DCEDC8' };
@@ -74,7 +106,7 @@ export default function GoalsScreen() {
                   <Text style={styles.goalSub}>{weekDone}/{goal.target} this week · boosts {goal.petEmoji} {goal.petStat}</Text>
                 </View>
                 {/* Edit button */}
-                <TouchableOpacity style={styles.iconBtn} onPress={() => { setEditingGoal(goal); setEditTitle(goal.title); }}>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => { setEditingGoal(goal); setEditTitle(goal.title); setEditTarget(goal.target || 3); }}>
                   <Text style={styles.iconBtnText}>✏️</Text>
                 </TouchableOpacity>
                 {/* Remove button */}
@@ -123,31 +155,49 @@ export default function GoalsScreen() {
       <Modal visible={showPicker} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Choose a Goal</Text>
-            <Text style={styles.modalSub}>Tap one to add it to your list.</Text>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {GOAL_PRESETS.map(preset => {
-                const alreadyAdded = addedIds.has(preset.id);
-                return (
-                  <TouchableOpacity
-                    key={preset.id}
-                    style={[styles.presetRow, alreadyAdded && styles.presetRowAdded]}
-                    onPress={() => !alreadyAdded && handleAddPreset(preset)}
-                    disabled={alreadyAdded}
-                  >
-                    <Text style={styles.presetEmoji}>{preset.emoji}</Text>
-                    <Text style={[styles.presetTitle, alreadyAdded && styles.presetTitleAdded]}>{preset.title}</Text>
-                    {alreadyAdded
-                      ? <Text style={styles.addedBadge}>Added ✓</Text>
-                      : <Text style={styles.presetAdd}>+</Text>
-                    }
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowPicker(false)}>
-              <Text style={styles.modalCloseText}>Done</Text>
-            </TouchableOpacity>
+            {pendingPreset ? (
+              <>
+                <Text style={styles.modalTitle}>{pendingPreset.emoji} {pendingPreset.title}</Text>
+                <FrequencyPicker
+                  value={pendingPreset.chosenTarget}
+                  onChange={n => setPendingPreset({ ...pendingPreset, chosenTarget: n })}
+                />
+                <TouchableOpacity style={styles.modalClose} onPress={handleConfirmPreset}>
+                  <Text style={styles.modalCloseText}>Add Goal</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setPendingPreset(null)}>
+                  <Text style={styles.cancelText}>Back</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={styles.modalTitle}>Choose a Goal</Text>
+                <Text style={styles.modalSub}>Tap one to add it to your list.</Text>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {GOAL_PRESETS.map(preset => {
+                    const alreadyAdded = addedIds.has(preset.id);
+                    return (
+                      <TouchableOpacity
+                        key={preset.id}
+                        style={[styles.presetRow, alreadyAdded && styles.presetRowAdded]}
+                        onPress={() => !alreadyAdded && handlePickPreset(preset)}
+                        disabled={alreadyAdded}
+                      >
+                        <Text style={styles.presetEmoji}>{preset.emoji}</Text>
+                        <Text style={[styles.presetTitle, alreadyAdded && styles.presetTitleAdded]}>{preset.title}</Text>
+                        {alreadyAdded
+                          ? <Text style={styles.addedBadge}>Added ✓</Text>
+                          : <Text style={styles.presetAdd}>+</Text>
+                        }
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+                <TouchableOpacity style={styles.modalClose} onPress={() => setShowPicker(false)}>
+                  <Text style={styles.modalCloseText}>Done</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -164,6 +214,7 @@ export default function GoalsScreen() {
               onChangeText={setCustomTitle}
               autoFocus
             />
+            <FrequencyPicker value={customTarget} onChange={setCustomTarget} />
             <TouchableOpacity
               style={[styles.modalClose, !customTitle.trim() && { opacity: 0.4 }]}
               onPress={handleAddCustom}
@@ -189,6 +240,7 @@ export default function GoalsScreen() {
               onChangeText={setEditTitle}
               autoFocus
             />
+            <FrequencyPicker value={editTarget} onChange={setEditTarget} />
             <TouchableOpacity
               style={[styles.modalClose, !editTitle.trim() && { opacity: 0.4 }]}
               onPress={handleEditSave}
@@ -258,5 +310,11 @@ const styles = StyleSheet.create({
   modalClose: { backgroundColor: '#7B9E87', borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 16, marginBottom: 8 },
   modalCloseText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   input: { borderWidth: 1.5, borderColor: '#E0E0E0', borderRadius: 12, padding: 14, fontSize: 15, marginBottom: 4 },
+  freqLabel: { fontSize: 13, fontWeight: '700', color: '#7A9C7A', textAlign: 'center', marginTop: 14, marginBottom: 10 },
+  freqRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  freqChip: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#F0F0F0', alignItems: 'center', justifyContent: 'center' },
+  freqChipOn: { backgroundColor: '#7B9E87' },
+  freqChipText: { fontSize: 15, fontWeight: '700', color: '#9A9A9A' },
+  freqChipTextOn: { color: '#fff' },
   cancelText: { textAlign: 'center', color: '#AAAAAA', fontSize: 14, paddingVertical: 8 },
 });

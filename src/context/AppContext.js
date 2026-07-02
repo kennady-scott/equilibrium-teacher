@@ -52,7 +52,7 @@ export function AppProvider({ children, userId }) {
 
         if (!error && data) {
           if (data.hydration != null)    setHydration(data.hydration);
-          if (data.goals) {
+          if (data.goals && data.goals.length) {
             const migrated = data.goals.map((g, i) =>
               g.featured === undefined ? { ...g, featured: i < 6 } : g
             );
@@ -99,7 +99,9 @@ export function AppProvider({ children, userId }) {
       saveTimerRef.current = setTimeout(() => {
         const pending = pendingSavesRef.current;
         pendingSavesRef.current = {};
-        supabase.from('profiles').upsert({ id: userId, ...pending, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+        supabase.from('profiles')
+          .upsert({ id: userId, ...pending, updated_at: new Date().toISOString() }, { onConflict: 'id' })
+          .then(({ error }) => { if (error) console.warn('Save failed:', error.message); });
       }, 800);
     } else {
       AsyncStorage.setItem(key, JSON.stringify(value));
@@ -150,7 +152,7 @@ export function AppProvider({ children, userId }) {
   }
 
   // Add a goal from the preset list or a custom one
-  function addGoal(preset, customTitle) {
+  function addGoal(preset, customTitle, target) {
     const existing = goals.find(g => g.id === preset.id);
     if (existing) return; // already added
     const featuredCount = goals.filter(g => g.featured).length;
@@ -158,6 +160,7 @@ export function AppProvider({ children, userId }) {
       ...preset,
       id: preset.id || Date.now().toString(),
       title: customTitle || preset.title,
+      target: target || preset.target || 3,
       checkins: [],
       featured: featuredCount < MAX_FEATURED,
     };
@@ -184,6 +187,12 @@ export function AppProvider({ children, userId }) {
 
   function updateGoalTitle(goalId, newTitle) {
     const updated = goals.map(g => g.id === goalId ? { ...g, title: newTitle } : g);
+    setGoals(updated);
+    save('goals', updated);
+  }
+
+  function updateGoalTarget(goalId, newTarget) {
+    const updated = goals.map(g => g.id === goalId ? { ...g, target: newTarget } : g);
     setGoals(updated);
     save('goals', updated);
   }
@@ -337,7 +346,7 @@ export function AppProvider({ children, userId }) {
     <AppContext.Provider value={{
       pet, hydration, goals, journalEntries, streak, mood, energy,
       updateHydration, checkInGoal, addGoal, removeGoal, toggleFeatured,
-      updateGoalTitle, addJournalEntry, logMood, logEnergy,
+      updateGoalTitle, updateGoalTarget, addJournalEntry, logMood, logEnergy,
       getPetStats, getPetMood, getPetLevel, getPetTrait, getDayProgress, getWeekDays,
       isHardDay, markHardDay, clearHardDay,
       currentDayMode, setDayMode,

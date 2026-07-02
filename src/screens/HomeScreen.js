@@ -85,8 +85,9 @@ export default function HomeScreen() {
     triggerWiggle();
   }
 
-  function handleHydration() {
-    updateHydration(Math.min(8, hydration + 1));
+  function handleHydration(i) {
+    // Tap a cup to set that level; tap the current top cup to un-fill it.
+    updateHydration(hydration === i ? i - 1 : i);
     triggerWiggle();
   }
 
