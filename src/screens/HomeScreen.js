@@ -12,6 +12,7 @@ import SickDayCard from '../components/SickDayCard';
 import ConferencesCard from '../components/ConferencesCard';
 import TestingCard from '../components/TestingCard';
 import DayModeModal, { DAY_MODE_META } from '../components/DayModeModal';
+import WaterBottle from '../components/WaterBottle';
 
 const MOODS = [
   { emoji: '😄', label: 'Great',       color: '#FFD166' },
@@ -49,6 +50,7 @@ export default function HomeScreen() {
     }
   }, [currentDayMode, mood]);
   const [habitatWidth, setHabitatWidth] = useState(340);
+  const [bottleKey, setBottleKey] = useState(null);
 
   const petMood  = getPetMood();
   const petStats = getPetStats();
@@ -91,8 +93,11 @@ export default function HomeScreen() {
 
   function handleHydration(i) {
     // Tap a cup to set that level; tap the current top cup to un-fill it.
-    updateHydration(hydration === i ? i - 1 : i);
+    const next = hydration === i ? i - 1 : i;
+    updateHydration(next);
     triggerWiggle();
+    // Adding water = give Pippin a drink from the bottle
+    if (next > hydration) setBottleKey(Date.now());
   }
 
   function handleDayModeSelect(mode) {
@@ -238,6 +243,12 @@ export default function HomeScreen() {
                 <PippinCharacter mood={petMood} behavior={pippinBehavior} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
               </Animated.View>
             </View>
+            {/* Water bottle — appears when the teacher logs a cup */}
+            {bottleKey && (
+              <View pointerEvents="none" style={styles.bottleWrap}>
+                <WaterBottle key={bottleKey} onDone={() => setBottleKey(null)} />
+              </View>
+            )}
             {/* Message bubble — lower-left inside habitat */}
             <View style={styles.msgBubbleWrap}>
               <View style={styles.msgBubble}>
@@ -446,6 +457,7 @@ const styles = StyleSheet.create({
   tagline: { fontSize: 13, color: '#8A9E8A', marginTop: 2 },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#E0EDD8', alignItems: 'center', justifyContent: 'center' },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  bottleWrap: { position: 'absolute', top: 66, left: '50%', marginLeft: 52, zIndex: 5 },
   dayModePill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 16, maxWidth: 150 },
   dayModePillEmoji: { fontSize: 14 },
   dayModePillText: { fontSize: 12, fontWeight: '700', flexShrink: 1 },
