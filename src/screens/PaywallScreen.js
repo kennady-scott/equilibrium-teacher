@@ -73,7 +73,7 @@ export default function PaywallScreen({ onSubscribed }) {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.pippin}>🐹</Text>
-        <Text style={styles.title}>Meet Pippin</Text>
+        <Text style={styles.title}>Centered Teacher</Text>
         <Text style={styles.subtitle}>
           Take care of you, so you can take care of them.
         </Text>

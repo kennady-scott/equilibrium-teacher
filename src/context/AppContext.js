@@ -36,6 +36,7 @@ export function AppProvider({ children, userId }) {
   const [loaded, setLoaded]                 = useState(false);
 
   const saveTimerRef = useRef(null);
+  const pendingSavesRef = useRef({});
 
   useEffect(() => { loadData(); }, [userId]);
 
@@ -93,9 +94,12 @@ export function AppProvider({ children, userId }) {
       const columnMap = { hydration: 'hydration', goals: 'goals', journalEntries: 'journal_entries', streak: 'streak', mood: 'mood', energy: 'energy', hardDay: 'hard_day', dayMode: 'day_mode' };
       const col = columnMap[key];
       if (!col) return;
+      pendingSavesRef.current[col] = value;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
-        supabase.from('profiles').upsert({ id: userId, [col]: value, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+        const pending = pendingSavesRef.current;
+        pendingSavesRef.current = {};
+        supabase.from('profiles').upsert({ id: userId, ...pending, updated_at: new Date().toISOString() }, { onConflict: 'id' });
       }, 800);
     } else {
       AsyncStorage.setItem(key, JSON.stringify(value));

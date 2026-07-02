@@ -2,10 +2,10 @@ import { Platform } from 'react-native';
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 
 // Fill these in after creating your RevenueCat project
-const REVENUECAT_APPLE_KEY   = 'appl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+const REVENUECAT_APPLE_KEY   = 'appl_BZlKVveecQCIzzSXUhVpZuKrDtX';
 const REVENUECAT_GOOGLE_KEY  = 'goog_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 
-export const ENTITLEMENT_ID  = 'pro';
+export const ENTITLEMENT_ID  = 'equilibrium Pro';
 export const OFFERING_ID     = 'default';
 
 export function initPurchases(userId) {

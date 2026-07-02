@@ -23,8 +23,8 @@
     "production": {
       "ios": {
         "appleId": "kennady@cleark12.com",
-        "ascAppId": "",
-        "appleTeamId": ""
+        "ascAppId": "6786366432",
+        "appleTeamId": "YG56VC8323"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Equilibrium",
-    "slug": "equilibrium",
+    "name": "Centered Teacher",
+    "slug": "centered-teacher",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,12 +12,15 @@
       "backgroundColor": "#F5F0EA"
     },
     "ios": {
-      "bundleIdentifier": "com.cleark12.equilibrium",
-      "buildNumber": "1",
-      "supportsTablet": false
+      "bundleIdentifier": "com.equilibriumapp.app",
+      "buildNumber": "2",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "package": "com.cleark12.equilibrium",
+      "package": "com.equilibriumapp.app",
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#F5F0EA",
@@ -32,6 +35,11 @@
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ef634ee2-181c-4237-9d8b-9e3845408f11"
+      }
+    }
   }
 }
