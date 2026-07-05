@@ -4,6 +4,8 @@ import {
   StyleSheet, Animated, Easing, Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import Svg, { Circle } from 'react-native-svg';
 import { useApp } from '../context/AppContext';
 import StreakInfoModal from '../components/StreakInfoModal';
 import PippinCharacter from '../components/PippinCharacter';
@@ -17,6 +19,29 @@ import DayModeModal, { DAY_MODE_META } from '../components/DayModeModal';
 import WaterBottle from '../components/WaterBottle';
 import PippinAction, { sceneForGoal } from '../components/PippinAction';
 
+// Goal emoji wrapped in a weekly-progress ring (fills the tile nicely and
+// shows how far along the week the teacher is on that goal).
+function GoalRing({ pct, emoji, done, size = 52 }) {
+  const stroke = 4;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - Math.max(0, Math.min(1, pct)));
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={size} height={size}>
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke="#ECE5DA" strokeWidth={stroke} fill="none" />
+        <Circle
+          cx={size / 2} cy={size / 2} r={r}
+          stroke={done ? '#4CAF50' : '#7B9E87'} strokeWidth={stroke} fill="none"
+          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </Svg>
+      <Text style={{ position: 'absolute', fontSize: size * 0.42 }}>{emoji}</Text>
+    </View>
+  );
+}
+
 const MOODS = [
   { emoji: '😄', label: 'Great',       color: '#FFD166' },
   { emoji: '😌', label: 'Okay',        color: '#A8D8A8' },
@@ -27,13 +52,14 @@ const MOODS = [
 ];
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
   const {
     name, hydration, goals, streak, mood,
     updateHydration, checkInGoal, logMood,
     getPetStats, getPetMood, getPetLevel, getPetTrait, getDayProgress, getWeekDays,
     isHardDay, markHardDay, clearHardDay,
     currentDayMode, setDayMode,
-    pippinBoost, triggerPippinCelebration,
+    pippinBoost, triggerPippinCelebration, MAX_FEATURED,
   } = useApp();
 
   const [showDayMode, setShowDayMode] = useState(false);
@@ -431,11 +457,28 @@ export default function HomeScreen() {
                 </View>
                 <Text style={styles.tilePetHint}>{goal.petEmoji || '✨'}</Text>
               </View>
-              <Text style={threePerRow ? styles.tileEmojiSm : styles.tileEmoji}>{goal.emoji}</Text>
+              <GoalRing
+                pct={goal.weekDone / goal.target}
+                emoji={goal.emoji}
+                done={goal.done}
+                size={threePerRow ? 44 : 54}
+              />
               <Text style={[styles.tileTitle, threePerRow && styles.tileTitleSm]} numberOfLines={2}>{goal.title}</Text>
               <Text style={styles.tileWeekly}>{goal.weekDone}/{goal.target}x this week</Text>
             </TouchableOpacity>
           ))}
+
+          {/* Add-a-goal tile fills the empty slot and invites action */}
+          {totalGoals < MAX_FEATURED && (
+            <TouchableOpacity
+              style={[styles.tile, styles.addTile, threePerRow ? styles.tileThird : styles.tileHalf]}
+              onPress={() => navigation.navigate('Goals')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.addTilePlus}>＋</Text>
+              <Text style={styles.addTileText}>Add a goal</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Quote + Streak row */}
@@ -586,7 +629,10 @@ const styles = StyleSheet.create({
   tileEmojiSm: { fontSize: 22, marginBottom: 4 },
   tileTitle:   { fontSize: 13, fontWeight: '700', color: '#2A3E2A', lineHeight: 17, marginBottom: 4 },
   tileTitleSm: { fontSize: 11 },
-  tileWeekly:  { fontSize: 10, color: '#9A9A9A', fontWeight: '600' },
+  tileWeekly:  { fontSize: 10, color: '#9A9A9A', fontWeight: '600', marginTop: 6 },
+  addTile: { alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#DCE6DC', borderStyle: 'dashed', backgroundColor: 'transparent' },
+  addTilePlus: { fontSize: 30, color: '#7B9E87', fontWeight: '400', marginBottom: 2 },
+  addTileText: { fontSize: 12, color: '#7B9E87', fontWeight: '700' },
   tileBar: { height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, marginTop: 8, overflow: 'hidden' },
   tileBarFill: { height: '100%', borderRadius: 2 },
 
