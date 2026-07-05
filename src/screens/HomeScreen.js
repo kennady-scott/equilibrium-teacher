@@ -445,33 +445,38 @@ export default function HomeScreen() {
               key={goal.id}
               style={[
                 styles.tile,
-                threePerRow ? styles.tileThird : styles.tileHalf,
+                styles.tileHalf,
                 { backgroundColor: goal.done ? '#C8E6C9' : '#fff' },
               ]}
               onPress={() => !goal.done && handleGoal(goal.id)}
               disabled={goal.done}
             >
-              <View style={styles.tileTop}>
-                <View style={[styles.tileCheck, goal.done && styles.tileCheckDone]}>
-                  {goal.done && <Text style={styles.tileCheckMark}>✓</Text>}
+              <View style={styles.tileRow}>
+                <View style={styles.ringWrap}>
+                  <GoalRing
+                    pct={goal.weekDone / goal.target}
+                    emoji={goal.emoji}
+                    done={goal.done}
+                    size={42}
+                  />
+                  {goal.done && (
+                    <View style={styles.tileCheckBadge}>
+                      <Text style={styles.tileCheckMark}>✓</Text>
+                    </View>
+                  )}
                 </View>
-                <Text style={styles.tilePetHint}>{goal.petEmoji || '✨'}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.tileTitle} numberOfLines={2}>{goal.title}</Text>
+                  <Text style={styles.tileWeekly}>{goal.weekDone}/{goal.target}x this week</Text>
+                </View>
               </View>
-              <GoalRing
-                pct={goal.weekDone / goal.target}
-                emoji={goal.emoji}
-                done={goal.done}
-                size={threePerRow ? 44 : 54}
-              />
-              <Text style={[styles.tileTitle, threePerRow && styles.tileTitleSm]} numberOfLines={2}>{goal.title}</Text>
-              <Text style={styles.tileWeekly}>{goal.weekDone}/{goal.target}x this week</Text>
             </TouchableOpacity>
           ))}
 
           {/* Add-a-goal tile fills the empty slot and invites action */}
           {totalGoals < MAX_FEATURED && (
             <TouchableOpacity
-              style={[styles.tile, styles.addTile, threePerRow ? styles.tileThird : styles.tileHalf]}
+              style={[styles.tile, styles.addTile, styles.tileHalf]}
               onPress={() => navigation.navigate('Goals')}
               activeOpacity={0.7}
             >
@@ -614,24 +619,19 @@ const styles = StyleSheet.create({
   // Tiles grid - 2 per row, full width
   tilesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
   tile: {
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 14,
+    padding: 10,
     shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
   },
   tileHalf:  { width: '47.5%' },
-  tileThird: { width: '31%', padding: 10 },
-  tileTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  tileCheck: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#CCC', alignItems: 'center', justifyContent: 'center' },
-  tileCheckDone: { backgroundColor: '#7B9E87', borderColor: '#7B9E87' },
-  tileCheckMark: { color: '#fff', fontSize: 13, fontWeight: '800' },
-  tilePetHint: { fontSize: 10, color: '#9A9A9A', fontWeight: '600' },
-  tileEmoji:   { fontSize: 28, marginBottom: 6 },
-  tileEmojiSm: { fontSize: 22, marginBottom: 4 },
-  tileTitle:   { fontSize: 13, fontWeight: '700', color: '#2A3E2A', lineHeight: 17, marginBottom: 4 },
-  tileTitleSm: { fontSize: 11 },
-  tileWeekly:  { fontSize: 10, color: '#9A9A9A', fontWeight: '600', marginTop: 6 },
-  addTile: { alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#DCE6DC', borderStyle: 'dashed', backgroundColor: 'transparent' },
-  addTilePlus: { fontSize: 30, color: '#7B9E87', fontWeight: '400', marginBottom: 2 },
+  tileRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  ringWrap: { position: 'relative' },
+  tileCheckBadge: { position: 'absolute', top: -3, right: -3, width: 17, height: 17, borderRadius: 9, backgroundColor: '#4CAF50', alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#fff' },
+  tileCheckMark: { color: '#fff', fontSize: 10, fontWeight: '800' },
+  tileTitle:   { fontSize: 12.5, fontWeight: '700', color: '#2A3E2A', lineHeight: 16 },
+  tileWeekly:  { fontSize: 10, color: '#9A9A9A', fontWeight: '600', marginTop: 2 },
+  addTile: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 2, borderColor: '#DCE6DC', borderStyle: 'dashed', backgroundColor: 'transparent' },
+  addTilePlus: { fontSize: 22, color: '#7B9E87', fontWeight: '400' },
   addTileText: { fontSize: 12, color: '#7B9E87', fontWeight: '700' },
   tileBar: { height: 4, backgroundColor: '#E0E0E0', borderRadius: 2, marginTop: 8, overflow: 'hidden' },
   tileBarFill: { height: '100%', borderRadius: 2 },
