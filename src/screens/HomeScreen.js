@@ -174,21 +174,30 @@ export default function HomeScreen() {
   const isCritical = petStats.overall < 5 && !hasRecentActivity && streak.count > 0;
   const moodLabel    = mood !== null ? MOODS[mood]?.label : '—';
   const energyPct    = `${petStats.energy}%`;
-  // Pippin's behavior mirrors the teacher's day: mood indices are
-  // 0 Great, 1 Okay, 2 Tired, 3 Stressed, 4 Overwhelmed, 5 Grateful.
-  const goodMood = mood === 0 || mood === 5;
-  const lowMood  = mood === 2 || mood === 3 || mood === 4;
-  const behaviorAllowed = !pippinBoost && !isHardDay && currentDayMode !== 'sub' && currentDayMode !== 'sick';
-  const pippinBehavior = !behaviorAllowed ? null
-    : lowMood && petStats.energy < 30 ? 'sleep'
-    : lowMood                          ? 'rest'
-    : goodMood && petStats.energy >= 60 ? 'run'
-    : mood !== null && petStats.energy >= 30 ? 'play'
-    : null;
-
   const petLevel     = getPetLevel();
   const petTrait     = getPetTrait();
   const dayProgress  = getDayProgress();
+
+  // Pippin wakes up the first time the teacher does anything each day, and
+  // then stays awake — he never dozes back off after finishing an action.
+  const engagedToday = mood !== null || hydration > 0 || dayProgress.goalDone || dayProgress.journalDone;
+
+  // Behavior mirrors the teacher's mood + energy. Once he's up for the day
+  // the lively states (run/play) still fire, but he never drops to sleeping.
+  // mood indices: 0 Great, 1 Okay, 2 Tired, 3 Stressed, 4 Overwhelmed, 5 Grateful.
+  const goodMood = mood === 0 || mood === 5;
+  const behaviorAllowed = !pippinBoost && !isHardDay && currentDayMode !== 'sub' && currentDayMode !== 'sick';
+  const pippinBehavior = !behaviorAllowed ? null
+    : goodMood && petStats.energy >= 60      ? 'run'
+    : mood !== null && petStats.energy >= 30  ? 'play'
+    : null;
+
+  // The idle pose. Before the teacher engages, Pippin naps (sleeping). Once
+  // awake, floor him at "awake" so a low mood or reset energy can't put him
+  // back to sleep between actions.
+  const idleState = engagedToday && (dayProgress.state === 'sleeping' || dayProgress.state === 'tired')
+    ? 'awake'
+    : dayProgress.state;
   const levelColor   = ['#A8C5A0', '#7EB5A0', '#5B9E8F', '#3D8070', '#2A5E52'][petLevel.level - 1];
   const daysToNext   = petLevel.nextThreshold ? petLevel.nextThreshold - petLevel.totalDays : 0;
 
@@ -247,7 +256,7 @@ export default function HomeScreen() {
                 {goalAction ? (
                   <PippinAction key={goalAction.key} scene={goalAction.scene} size={170} onDone={() => setGoalAction(null)} />
                 ) : (
-                  <PippinCharacter mood={petMood} behavior={pippinBehavior} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : dayProgress.state)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
+                  <PippinCharacter mood={petMood} behavior={pippinBehavior} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : idleState)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
                 )}
               </Animated.View>
             </View>
