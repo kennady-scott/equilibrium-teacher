@@ -237,7 +237,7 @@ export default function HomeScreen() {
           {/* Habitat — fully covers everything above the water tracker */}
           <View style={styles.habitatSection} onLayout={e => setHabitatWidth(e.nativeEvent.layout.width)}>
             <View style={styles.habitatBg}>
-              <PippinHabitat width={habitatWidth} height={300} mood={petMood} />
+              <PippinHabitat width={habitatWidth} height={300} mood={petMood} level={petLevel.level} />
             </View>
             {/* Name — upper-left overlay */}
             <View style={styles.petNameOverlay}>
@@ -256,7 +256,7 @@ export default function HomeScreen() {
                 {goalAction ? (
                   <PippinAction key={goalAction.key} scene={goalAction.scene} size={170} onDone={() => setGoalAction(null)} />
                 ) : (
-                  <PippinCharacter mood={petMood} behavior={pippinBehavior} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : idleState)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} />
+                  <PippinCharacter mood={petMood} behavior={pippinBehavior} dayState={pippinBoost ?? (isHardDay ? 'awake' : (currentDayMode === 'sub' || currentDayMode === 'sick') ? 'happy' : idleState)} size={170} critical={isCritical && !isHardDay && currentDayMode !== 'sub'} level={petLevel.level} />
                 )}
               </Animated.View>
             </View>

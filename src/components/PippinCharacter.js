@@ -18,7 +18,7 @@ const AnimatedG = Animated.createAnimatedComponent(G);
 // mood (fallback for PetScreen etc.): 'happy' | 'okay' | 'sad'
 const BEHAVIOR_STATE = { run: 'happy', play: 'happy', rest: 'tired', sleep: 'sleeping' };
 
-export default function PippinCharacter({ mood = 'okay', dayState = null, behavior = null, size = 200, critical = false }) {
+export default function PippinCharacter({ mood = 'okay', dayState = null, behavior = null, size = 200, critical = false, level = 1 }) {
 
   // Resolve which visual state to render. Celebrating always wins; otherwise
   // a behavior picks the face/pose, then dayState, then mood.
@@ -45,6 +45,45 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, behavi
   const runX       = useRef(new Animated.Value(0)).current;
   const faceDir    = useRef(new Animated.Value(1)).current;
   const lieDown    = useRef(new Animated.Value(0)).current;
+  // Level-unlocked flourishes: L3 hop, L4 wave, L5 ambient sparkles
+  const levelHop   = useRef(new Animated.Value(0)).current;
+  const waveArm    = useRef(new Animated.Value(0)).current;
+  const ambient    = useRef(new Animated.Value(0)).current;
+
+  // Idle flourishes unlocked by Pippin's lifetime level. They only play in a
+  // calm/awake idle (not while running, sleeping, or lying down), so they add
+  // richness at higher levels without fighting the mood-driven poses.
+  const idleFlourish = !isRunning && !isAsleep && !isLying && !isTired;
+  useEffect(() => {
+    levelHop.stopAnimation(); levelHop.setValue(0);
+    waveArm.stopAnimation();  waveArm.setValue(0);
+    ambient.stopAnimation();  ambient.setValue(0);
+
+    if (level >= 3 && idleFlourish) {
+      // Occasional happy hop
+      Animated.loop(Animated.sequence([
+        Animated.delay(2600),
+        Animated.timing(levelHop, { toValue: -18, duration: 220, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(levelHop, { toValue: 0,   duration: 240, easing: Easing.in(Easing.quad),  useNativeDriver: true }),
+        Animated.timing(levelHop, { toValue: -9,  duration: 150, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(levelHop, { toValue: 0,   duration: 170, easing: Easing.in(Easing.quad),  useNativeDriver: true }),
+      ])).start();
+    }
+    if (level >= 4 && idleFlourish) {
+      // Periodic paw wave toward the teacher
+      Animated.loop(Animated.sequence([
+        Animated.delay(3400),
+        Animated.timing(waveArm, { toValue: 1, duration: 200, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(waveArm, { toValue: 0.6, duration: 180, useNativeDriver: true }),
+        Animated.timing(waveArm, { toValue: 1, duration: 180, useNativeDriver: true }),
+        Animated.timing(waveArm, { toValue: 0, duration: 220, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+      ])).start();
+    }
+    if (level >= 5) {
+      // Gentle always-on ambient sparkle/heart drift
+      Animated.loop(Animated.timing(ambient, { toValue: 1, duration: 2600, easing: Easing.linear, useNativeDriver: true })).start();
+    }
+  }, [level, idleFlourish]);
 
   useEffect(() => {
     bodyBob.stopAnimation();
@@ -152,7 +191,7 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, behavi
       <Animated.View style={{
         transform: [
           { translateX: runX },
-          { translateY: Animated.add(bodyBob, lieDown.interpolate({ inputRange: [0, 1], outputRange: [0, size * 0.12] })) },
+          { translateY: Animated.add(Animated.add(bodyBob, levelHop), lieDown.interpolate({ inputRange: [0, 1], outputRange: [0, size * 0.12] })) },
           { scaleX: faceDir },
           { rotate: lieDown.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '80deg'] }) },
           { rotate: sway.interpolate({ inputRange: [-6, 6], outputRange: ['-6deg', '6deg'] }) },
@@ -325,6 +364,43 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, behavi
               <SvgText x="28" y="14" fontSize={isAsleep ? "9"  : "8"}  fill="#8899AA" opacity={0.5} fontWeight="bold">z</SvgText>
             </Svg>
           </Animated.View>
+        )}
+
+        {/* Level 4+ — waving paw toward the teacher */}
+        {level >= 4 && idleFlourish && (
+          <Animated.View style={{
+            position: 'absolute', right: size * 0.14, top: size * 0.52,
+            opacity: waveArm,
+            transform: [
+              { translateY: size * -0.05 },
+              { rotate: waveArm.interpolate({ inputRange: [0, 1], outputRange: ['8deg', '-34deg'] }) },
+            ],
+          }}>
+            <Svg width={size * 0.2} height={size * 0.32} viewBox="0 0 40 64">
+              <Path d="M18,60 Q8,34 16,10" stroke="#E8A87C" strokeWidth={14} fill="none" strokeLinecap="round" />
+              <Circle cx={17} cy={10} r={9} fill="#F5D5B0" />
+            </Svg>
+          </Animated.View>
+        )}
+
+        {/* Level 5 — ambient sparkle + heart drifting up */}
+        {level >= 5 && (
+          <>
+            <Animated.View style={{
+              position: 'absolute', top: size * 0.12, right: size * 0.1,
+              opacity: ambient.interpolate({ inputRange: [0, 0.2, 0.8, 1], outputRange: [0, 1, 1, 0] }),
+              transform: [{ translateY: ambient.interpolate({ inputRange: [0, 1], outputRange: [0, size * -0.18] }) }],
+            }}>
+              <Svg width={18} height={18} viewBox="0 0 24 24"><Path d="M12,2 L13.5,10 L21,12 L13.5,14 L12,22 L10.5,14 L3,12 L10.5,10 Z" fill="#FFD36E" /></Svg>
+            </Animated.View>
+            <Animated.View style={{
+              position: 'absolute', top: size * 0.24, left: size * 0.12,
+              opacity: ambient.interpolate({ inputRange: [0, 0.35, 0.9, 1], outputRange: [0, 0.9, 0.9, 0] }),
+              transform: [{ translateY: ambient.interpolate({ inputRange: [0, 1], outputRange: [size * 0.04, size * -0.14] }) }],
+            }}>
+              <Svg width={16} height={16} viewBox="0 0 28 28"><Path d="M14,22 C14,22 4,16 4,9 C4,6 6,4 9,4 C11,4 13,6 14,8 C15,6 17,4 19,4 C22,4 24,6 24,9 C24,16 14,22 14,22 Z" fill="#FF9EB5" /></Svg>
+            </Animated.View>
+          </>
         )}
       </Animated.View>
     </View>

@@ -40,10 +40,10 @@ export default function PetScreen() {
       <View style={styles.petCard}>
         <View style={styles.habitatSection} onLayout={e => setHabitatWidth(e.nativeEvent.layout.width)}>
           <View style={styles.habitatBg}>
-            <PippinHabitat width={habitatWidth} height={340} mood={petMood} />
+            <PippinHabitat width={habitatWidth} height={340} mood={petMood} level={petLevel.level} />
           </View>
           <View style={styles.stageWrap}>
-            <PippinCharacter mood={petMood} size={210} critical={isCritical} />
+            <PippinCharacter mood={petMood} size={210} critical={isCritical} level={petLevel.level} />
           </View>
           <Text style={styles.petName}>{pet.name}</Text>
           <Text style={[styles.petStatusLabel, { color: state.accent }]}>{state.label}</Text>
