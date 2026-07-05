@@ -45,9 +45,8 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, behavi
   const runX       = useRef(new Animated.Value(0)).current;
   const faceDir    = useRef(new Animated.Value(1)).current;
   const lieDown    = useRef(new Animated.Value(0)).current;
-  // Level-unlocked flourishes: L3 hop, L4 wave, L5 ambient sparkles
+  // Level-unlocked flourishes: L3 hop, L5 ambient sparkles
   const levelHop   = useRef(new Animated.Value(0)).current;
-  const waveArm    = useRef(new Animated.Value(0)).current;
   const ambient    = useRef(new Animated.Value(0)).current;
 
   // Idle flourishes unlocked by Pippin's lifetime level. They only play in a
@@ -56,7 +55,6 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, behavi
   const idleFlourish = !isRunning && !isAsleep && !isLying && !isTired;
   useEffect(() => {
     levelHop.stopAnimation(); levelHop.setValue(0);
-    waveArm.stopAnimation();  waveArm.setValue(0);
     ambient.stopAnimation();  ambient.setValue(0);
 
     if (level >= 3 && idleFlourish) {
@@ -67,16 +65,6 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, behavi
         Animated.timing(levelHop, { toValue: 0,   duration: 240, easing: Easing.in(Easing.quad),  useNativeDriver: true }),
         Animated.timing(levelHop, { toValue: -9,  duration: 150, easing: Easing.out(Easing.quad), useNativeDriver: true }),
         Animated.timing(levelHop, { toValue: 0,   duration: 170, easing: Easing.in(Easing.quad),  useNativeDriver: true }),
-      ])).start();
-    }
-    if (level >= 4 && idleFlourish) {
-      // Periodic paw wave toward the teacher
-      Animated.loop(Animated.sequence([
-        Animated.delay(3400),
-        Animated.timing(waveArm, { toValue: 1, duration: 200, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(waveArm, { toValue: 0.6, duration: 180, useNativeDriver: true }),
-        Animated.timing(waveArm, { toValue: 1, duration: 180, useNativeDriver: true }),
-        Animated.timing(waveArm, { toValue: 0, duration: 220, easing: Easing.in(Easing.quad), useNativeDriver: true }),
       ])).start();
     }
     if (level >= 5) {
@@ -362,23 +350,6 @@ export default function PippinCharacter({ mood = 'okay', dayState = null, behavi
               <SvgText x="5"  y="32" fontSize={isAsleep ? "16" : "14"} fill="#8899AA" opacity={0.9} fontWeight="bold">z</SvgText>
               <SvgText x="18" y="22" fontSize={isAsleep ? "12" : "10"} fill="#8899AA" opacity={0.7} fontWeight="bold">z</SvgText>
               <SvgText x="28" y="14" fontSize={isAsleep ? "9"  : "8"}  fill="#8899AA" opacity={0.5} fontWeight="bold">z</SvgText>
-            </Svg>
-          </Animated.View>
-        )}
-
-        {/* Level 4+ — waving paw toward the teacher */}
-        {level >= 4 && idleFlourish && (
-          <Animated.View style={{
-            position: 'absolute', right: size * 0.14, top: size * 0.52,
-            opacity: waveArm,
-            transform: [
-              { translateY: size * -0.05 },
-              { rotate: waveArm.interpolate({ inputRange: [0, 1], outputRange: ['8deg', '-34deg'] }) },
-            ],
-          }}>
-            <Svg width={size * 0.2} height={size * 0.32} viewBox="0 0 40 64">
-              <Path d="M18,60 Q8,34 16,10" stroke="#E8A87C" strokeWidth={14} fill="none" strokeLinecap="round" />
-              <Circle cx={17} cy={10} r={9} fill="#F5D5B0" />
             </Svg>
           </Animated.View>
         )}

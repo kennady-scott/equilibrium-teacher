@@ -3,7 +3,9 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, Animated, Easing, Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '../context/AppContext';
+import StreakInfoModal from '../components/StreakInfoModal';
 import PippinCharacter from '../components/PippinCharacter';
 import PippinHabitat from '../components/PippinHabitat';
 import HardDayCard from '../components/HardDayCard';
@@ -53,6 +55,18 @@ export default function HomeScreen() {
   const [habitatWidth, setHabitatWidth] = useState(340);
   const [bottleKey, setBottleKey] = useState(null);
   const [goalAction, setGoalAction] = useState(null); // { scene, key }
+  const [showStreakInfo, setShowStreakInfo] = useState(false);
+
+  // Show the streak explainer once, the first time the app is opened
+  useEffect(() => {
+    AsyncStorage.getItem('streakInfoSeen').then(seen => {
+      if (!seen) setShowStreakInfo(true);
+    });
+  }, []);
+  function dismissStreakInfo() {
+    setShowStreakInfo(false);
+    AsyncStorage.setItem('streakInfoSeen', '1');
+  }
 
   const petMood  = getPetMood();
   const petStats = getPetStats();
@@ -138,6 +152,32 @@ export default function HomeScreen() {
   const dayIndex = new Date().getDate() + new Date().getMonth() * 31;
   const dailyReminder = PIPPIN_REMINDERS[dayIndex % PIPPIN_REMINDERS.length];
 
+  // Daily motivational quote for educators (rotates each day, offset from the
+  // Pippin reminder so the two lines never coincide)
+  const DAILY_QUOTES = [
+    "Teaching is the one profession that creates all other professions.",
+    "The influence of a good teacher can never be erased.",
+    "You have not failed until you quit trying — and you're still here.",
+    "Small steps today, big impact tomorrow.",
+    "To the world you may be one teacher, but to one student you may be the world.",
+    "Rest so you can rise. You can't teach on empty.",
+    "Every child you reach is a ripple that outlives the lesson.",
+    "You are planting seeds you may never see bloom — plant them anyway.",
+    "Progress, not perfection. That goes for you too.",
+    "A teacher takes a hand, opens a mind, and touches a heart.",
+    "The days are long, but the years are meaningful.",
+    "Your patience today becomes someone's confidence tomorrow.",
+    "You don't have to be perfect to be exactly what a student needs.",
+    "Great teachers aren't made in easy years. Look how far you've come.",
+    "Take care of the teacher — the classroom depends on her.",
+    "The best thing you can bring to your students is a rested, cared-for you.",
+    "Some of the most important work you do won't show up on any test.",
+    "Be the reason a student believes in good people.",
+    "You are doing sacred, ordinary, extraordinary work.",
+    "Celebrate the small wins — they add up to a whole year.",
+  ];
+  const dailyQuote = DAILY_QUOTES[(dayIndex + 7) % DAILY_QUOTES.length];
+
   const petStateMap = {
     happy: { bg: ['#C8E6C9', '#E8F5E9'], msgColor: '#388E3C' },
     okay:  { bg: ['#FFF9C4', '#FFFDE7'], msgColor: '#F9A825' },
@@ -167,6 +207,8 @@ export default function HomeScreen() {
   const threePerRow   = totalGoals >= 5;
 
   const overallLabel = isHardDay ? 'Here to help you' : petStats.overall >= 60 ? 'Well cared for' : petStats.overall >= 20 ? 'Needs attention' : 'Needs your help';
+  // Care heart color tracks how cared-for Pippin is (blue on a hard day)
+  const careHeart = isHardDay ? '💙' : petStats.overall >= 60 ? '💚' : petStats.overall >= 20 ? '💛' : '❤️';
 
   // X eyes only when the teacher has been completely inactive for 3+ days and stats are near zero
   const threeDaysAgo = new Date(Date.now() - 3 * 86400000);
@@ -304,7 +346,7 @@ export default function HomeScreen() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statIcon}>💙</Text>
+              <Text style={styles.statIcon}>{careHeart}</Text>
               <Text style={styles.statKey}>Care</Text>
               <Text style={styles.statVal}>{overallLabel}</Text>
             </View>
@@ -400,19 +442,20 @@ export default function HomeScreen() {
         <View style={styles.bottomRow}>
           <View style={[styles.quoteCard]}>
             <Text style={styles.quoteDecor}>🌿 ☕</Text>
-            <Text style={styles.quoteText}>Small steps today, big impact tomorrow.</Text>
+            <Text style={styles.quoteText}>{dailyQuote}</Text>
             <Text style={styles.quoteHeart}>💙</Text>
           </View>
 
-          <View style={styles.streakCard}>
+          <TouchableOpacity style={styles.streakCard} activeOpacity={0.85} onPress={() => setShowStreakInfo(true)}>
             <View style={styles.streakTop}>
               <View style={styles.streakFlame}>
                 <Text style={{ fontSize: 24 }}>🔥</Text>
               </View>
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text style={styles.streakCount}>{streak.count} day streak</Text>
                 <Text style={styles.streakSub}>Keep it up!</Text>
               </View>
+              <Text style={styles.streakInfoDot}>ⓘ</Text>
             </View>
             <View style={styles.weekRow}>
               {weekDays.map(d => (
@@ -424,10 +467,13 @@ export default function HomeScreen() {
                 </View>
               ))}
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
 
       </ScrollView>
+
+      {/* ===== STREAK EXPLAINER (first launch + reopenable) ===== */}
+      <StreakInfoModal visible={showStreakInfo} onClose={dismissStreakInfo} />
 
       {/* ===== DAY MODE MODAL ===== */}
       <DayModeModal visible={showDayMode} onSelect={handleDayModeSelect} />
@@ -551,6 +597,7 @@ const styles = StyleSheet.create({
   quoteText: { fontSize: 13, color: '#4A6741', fontWeight: '600', lineHeight: 18 },
   quoteHeart: { fontSize: 16, marginTop: 8 },
   streakCard: { flex: 1, backgroundColor: '#fff', borderRadius: 16, padding: 14, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 1 },
+  streakInfoDot: { fontSize: 14, color: '#B8C4B8', fontWeight: '700' },
   streakTop: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   streakFlame: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center' },
   streakCount: { fontSize: 13, fontWeight: '800', color: '#2A3E2A' },

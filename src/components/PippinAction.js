@@ -14,7 +14,8 @@ export const GOAL_SCENES = {
   read: 'book', learn: 'book',
   call: 'phone',
   noemails: 'moon', screen: 'moon',
-  outside: 'sun', leave: 'sun',
+  outside: 'sun',
+  leave: 'walkpark',
   kindness: 'heart',
 };
 export const sceneForGoal = (goalId) => GOAL_SCENES[goalId] ?? 'heart';
@@ -28,6 +29,7 @@ export default function PippinAction({ scene = 'heart', size = 170, onDone }) {
   const spin    = useRef(new Animated.Value(0)).current; // wheel / sun rays
   const munch   = useRef(new Animated.Value(0)).current; // mouth open/close
   const twinkle = useRef(new Animated.Value(0)).current; // stars / hearts / bits
+  const story   = useRef(new Animated.Value(0)).current; // multi-beat scenes (walkpark)
 
   useEffect(() => {
     Animated.sequence([
@@ -35,6 +37,12 @@ export default function PippinAction({ scene = 'heart', size = 170, onDone }) {
       Animated.delay(2900),
       Animated.timing(appear, { toValue: 0, duration: 260, useNativeDriver: true }),
     ]).start(() => onDone && onDone());
+
+    // Multi-beat timeline for narrative scenes (close laptop → walk in park)
+    Animated.sequence([
+      Animated.delay(300),
+      Animated.timing(story, { toValue: 1, duration: 2700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+    ]).start();
 
     Animated.loop(Animated.sequence([
       Animated.timing(breath, { toValue: 1, duration: 1100, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
@@ -276,6 +284,64 @@ export default function PippinAction({ scene = 'heart', size = 170, onDone }) {
             <Circle cx={cx + 50} cy={cy - 24} r={7} fill={BELLY} />
             <Head eyes="happy" y={8} />
           </Svg>
+        </Animated.View>
+      </View>
+    );
+  } else if (scene === 'walkpark') {
+    // Two beats: close the laptop, then walk off into a park.
+    const lidRotate     = story.interpolate({ inputRange: [0, 0.32, 1], outputRange: ['0deg', '84deg', '84deg'] });
+    const laptopOpacity = story.interpolate({ inputRange: [0, 0.34, 0.46, 1], outputRange: [1, 1, 0, 0] });
+    const parkOpacity   = story.interpolate({ inputRange: [0, 0.36, 0.56, 1], outputRange: [0, 0, 1, 1] });
+    const pippinX       = story.interpolate({ inputRange: [0, 0.42, 1], outputRange: [-size * 0.16, -size * 0.16, size * 0.14] });
+    const walkBob       = story.interpolate({ inputRange: [0, 0.42, 1], outputRange: [0, 0, 1] });
+    art = (
+      <View>
+        {/* Park backdrop fades in as Pippin heads out */}
+        <Animated.View style={{ position: 'absolute', top: 0, left: 0, opacity: parkOpacity }}>
+          <Svg width={size} height={size} viewBox="0 0 200 200">
+            <Ellipse cx={100} cy={182} rx={120} ry={34} fill="#A9D18E" opacity={0.55} />
+            <Rect x={30} y={170} width={140} height={22} rx={11} fill="#D8C7A0" opacity={0.5} />
+            {/* Tree, back right */}
+            <Rect x={152} y={96} width={10} height={52} rx={3} fill="#9A6B4A" />
+            <Circle cx={157} cy={84} r={26} fill="#7BA05B" />
+            <Circle cx={140} cy={96} r={17} fill="#8FB86A" />
+            <Circle cx={173} cy={96} r={17} fill="#6E9450" />
+            {/* Little bush, back left */}
+            <Circle cx={34} cy={150} r={13} fill="#8FB86A" />
+            <Circle cx={46} cy={152} r={10} fill="#7BA05B" />
+          </Svg>
+        </Animated.View>
+
+        {/* Pippin — sits at the laptop, then walks to the right */}
+        <Animated.View style={{ transform: [
+          { translateX: pippinX },
+          { translateY: Animated.multiply(bob, walkBob) },
+        ] }}>
+          <Svg width={size} height={size} viewBox="0 0 200 200">
+            <Ellipse cx={cx} cy={cy + 62} rx={40} ry={8} fill="rgba(0,0,0,0.12)" />
+            <Ellipse cx={cx} cy={cy + 26} rx={40} ry={32} fill={FUR} />
+            <Ellipse cx={cx} cy={cy + 32} rx={25} ry={20} fill={BELLY} />
+            {/* Walking legs */}
+            <Ellipse cx={cx - 15} cy={cy + 56} rx={11} ry={6} fill={SHADE} transform={`rotate(-18 ${cx - 15} ${cy + 56})`} />
+            <Ellipse cx={cx + 15} cy={cy + 56} rx={11} ry={6} fill={SHADE} transform={`rotate(18 ${cx + 15} ${cy + 56})`} />
+            <Head eyes="happy" y={10} />
+          </Svg>
+        </Animated.View>
+
+        {/* Laptop — sits in front of Pippin, lid folds shut, then fades */}
+        <Animated.View style={{ position: 'absolute', top: size * 0.62, left: size * 0.36, opacity: laptopOpacity }}>
+          {/* Keyboard base */}
+          <Svg width={size * 0.3} height={size * 0.09} viewBox="0 0 60 18">
+            <Path d="M6,14 L54,14 L48,4 L12,4 Z" fill="#C2C8D2" />
+            <Rect x={2} y={13} width={56} height={5} rx={2.5} fill="#9098A4" />
+          </Svg>
+          {/* Screen lid, hinged at the back edge */}
+          <Animated.View style={{ position: 'absolute', bottom: size * 0.045, left: size * 0.035, transform: [{ rotate: lidRotate }] }}>
+            <Svg width={size * 0.22} height={size * 0.15} viewBox="0 0 44 30">
+              <Rect x={2} y={2} width={40} height={26} rx={3} fill="#7C8494" />
+              <Rect x={5} y={5} width={34} height={20} rx={2} fill="#AFCBE0" />
+            </Svg>
+          </Animated.View>
         </Animated.View>
       </View>
     );

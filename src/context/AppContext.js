@@ -15,9 +15,10 @@ const LEVEL_NAMES = ['New Buddy', 'Settled Buddy', 'Confident Buddy', 'Companion
 
 // featured = shown as a tile on the home screen (up to 6)
 const defaultGoals = [
-  { id: 'breathing', title: 'Deep breathing or meditation', emoji: '🌿', petStat: 'calm',   petEmoji: '😊', target: 3, checkins: [], featured: true },
-  { id: 'walk',      title: 'Walk break during the day',    emoji: '🚶', petStat: 'energy', petEmoji: '⚡', target: 3, checkins: [], featured: true },
-  { id: 'lunch',     title: 'Healthy lunch',                emoji: '🥗', petStat: 'hunger', petEmoji: '🍎', target: 5, checkins: [], featured: true },
+  { id: 'leave',     title: 'Leave school at contract time', emoji: '🏫', petStat: 'calm',   petEmoji: '😊', target: 5, checkins: [], featured: true },
+  { id: 'breathing', title: 'Deep breathing or meditation',  emoji: '🌿', petStat: 'calm',   petEmoji: '😊', target: 3, checkins: [], featured: true },
+  { id: 'walk',      title: 'Walk break during the day',     emoji: '🚶', petStat: 'energy', petEmoji: '⚡', target: 3, checkins: [], featured: true },
+  { id: 'lunch',     title: 'Healthy lunch',                 emoji: '🥗', petStat: 'hunger', petEmoji: '🍎', target: 5, checkins: [], featured: true },
 ];
 
 const defaultPet = { name: 'Pippin', type: 'hamster' };
