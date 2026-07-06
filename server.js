@@ -39,11 +39,11 @@ const PRIVACY_HTML = `<!DOCTYPE html>
   <h2>Where your data is stored</h2>
   <p>Your data is stored securely using <a href="https://supabase.com">Supabase</a>, a SOC 2 Type II certified cloud database provider based in the United States.</p>
   <h2>Data retention</h2>
-  <p>Your data is kept for as long as your account is active. You can request deletion at any time by emailing <a href="mailto:kennady@cleark12.com">kennady@cleark12.com</a> — we will permanently delete all your data within 30 days.</p>
+  <p>Your data is kept for as long as your account is active. You can request deletion at any time by emailing <a href="mailto:kennady.nickell@gmail.com">kennady.nickell@gmail.com</a> — we will permanently delete all your data within 30 days.</p>
   <h2>Children's privacy</h2>
   <p>Refill is designed for teachers (adults). We do not knowingly collect data from anyone under 13.</p>
   <h2>Contact</h2>
-  <p>Questions? Email <a href="mailto:kennady@cleark12.com">kennady@cleark12.com</a></p>
+  <p>Questions? Email <a href="mailto:kennady.nickell@gmail.com">kennady.nickell@gmail.com</a></p>
 </body>
 </html>`;
 

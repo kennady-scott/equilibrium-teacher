@@ -36,11 +36,11 @@ Your data is stored securely using [Supabase](https://supabase.com), a cloud dat
 
 ## Data retention
 
-Your data is kept for as long as your account is active. You can delete your account at any time by contacting us at **kennady@cleark12.com**, and we will permanently delete all your data within 30 days.
+Your data is kept for as long as your account is active. You can delete your account at any time by contacting us at **kennady.nickell@gmail.com**, and we will permanently delete all your data within 30 days.
 
 ## Children's privacy
 
-Equilibrium is designed for teachers (adults). We do not knowingly collect data from anyone under 13. If you believe a child has created an account, please contact us immediately.
+Refill is designed for teachers (adults). We do not knowingly collect data from anyone under 13. If you believe a child has created an account, please contact us immediately.
 
 ## Changes to this policy
 
@@ -48,4 +48,4 @@ If we make significant changes, we'll notify you by email. Continued use of the 
 
 ## Contact
 
-Questions? Email us at **kennady@cleark12.com**
+Questions? Email us at **kennady.nickell@gmail.com**
