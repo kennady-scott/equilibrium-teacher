@@ -21,7 +21,7 @@ const PRIVACY_HTML = `<!DOCTYPE html>
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Privacy Policy — Centered Teacher</title>
+  <title>Privacy Policy — Refill</title>
   <style>
     body { font-family: -apple-system, sans-serif; max-width: 680px; margin: 0 auto; padding: 40px 24px; color: #2A3E2A; line-height: 1.7; }
     h1 { color: #4A7A5E; } h2 { color: #4A7A5E; margin-top: 32px; }
@@ -29,9 +29,9 @@ const PRIVACY_HTML = `<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <h1>Privacy Policy — Centered Teacher</h1>
+  <h1>Privacy Policy — Refill</h1>
   <p><strong>Last updated: July 1, 2026</strong></p>
-  <p>Centered Teacher is a teacher wellness app built by Kennady Scott. We take your privacy seriously.</p>
+  <p>Refill is a teacher wellness app built by Kennady Scott. We take your privacy seriously.</p>
   <h2>What we collect</h2>
   <p>When you create an account, we collect your <strong>email address</strong> and <strong>first name</strong>. We also store the wellness data you create: daily goal check-ins, water intake, journal entries, mood and energy ratings, and streak history.</p>
   <h2>How we use it</h2>
@@ -41,7 +41,7 @@ const PRIVACY_HTML = `<!DOCTYPE html>
   <h2>Data retention</h2>
   <p>Your data is kept for as long as your account is active. You can request deletion at any time by emailing <a href="mailto:kennady@cleark12.com">kennady@cleark12.com</a> — we will permanently delete all your data within 30 days.</p>
   <h2>Children's privacy</h2>
-  <p>Centered Teacher is designed for teachers (adults). We do not knowingly collect data from anyone under 13.</p>
+  <p>Refill is designed for teachers (adults). We do not knowingly collect data from anyone under 13.</p>
   <h2>Contact</h2>
   <p>Questions? Email <a href="mailto:kennady@cleark12.com">kennady@cleark12.com</a></p>
 </body>

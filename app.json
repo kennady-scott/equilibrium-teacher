@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Centered Teacher",
+    "name": "Refill",
     "slug": "centered-teacher",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,7 +13,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.equilibriumapp.app",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

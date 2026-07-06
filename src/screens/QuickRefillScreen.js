@@ -28,7 +28,7 @@ export default function QuickRefillScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Quick Refill</Text>
+        <Text style={styles.title}>Quick Reset</Text>
         <Text style={styles.subtitle}>You can't pour from an empty cup. Take a sip.</Text>
 
         {!strategy ? (

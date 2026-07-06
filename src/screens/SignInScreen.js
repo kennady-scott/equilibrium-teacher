@@ -34,7 +34,7 @@ export default function SignInScreen({ onNavigateToSignUp }) {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.logo}>🐹</Text>
         <Text style={styles.title}>Welcome back</Text>
-        <Text style={styles.sub}>Sign in to Centered Teacher</Text>
+        <Text style={styles.sub}>Sign in to Refill</Text>
 
         {error && (
           <View style={styles.errorBox}>

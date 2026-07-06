@@ -51,7 +51,7 @@ export default function SignUpScreen({ onNavigateToSignIn }) {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.logo}>🐹</Text>
         <Text style={styles.title}>Create your account</Text>
-        <Text style={styles.sub}>Join Centered Teacher — your daily reset.</Text>
+        <Text style={styles.sub}>Join Refill — your daily reset.</Text>
 
         {error && (
           <View style={styles.errorBox}>

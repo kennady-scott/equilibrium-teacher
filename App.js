@@ -40,7 +40,7 @@ const Stack = createNativeStackNavigator();
 const ICONS = {
   Home: '🏠',
   Goals: '🎯',
-  Refill: '☕',
+  Reset: '☕',
   Pet: '🐹',
   Journal: '📖',
   Profile: '🏅',
@@ -69,7 +69,7 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Goals" component={GoalsScreen} />
-      <Tab.Screen name="Refill" component={QuickRefillScreen} />
+      <Tab.Screen name="Reset" component={QuickRefillScreen} />
       <Tab.Screen name="Pet" component={PetScreen} />
       <Tab.Screen name="Journal" component={JournalScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
