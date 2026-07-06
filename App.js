@@ -28,6 +28,7 @@ import { AppProvider } from './src/context/AppContext';
 import HomeScreen from './src/screens/HomeScreen';
 import GoalsScreen from './src/screens/GoalsScreen';
 import PetScreen from './src/screens/PetScreen';
+import QuickRefillScreen from './src/screens/QuickRefillScreen';
 import JournalScreen from './src/screens/JournalScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SignInScreen from './src/screens/SignInScreen';
@@ -39,6 +40,7 @@ const Stack = createNativeStackNavigator();
 const ICONS = {
   Home: '🏠',
   Goals: '🎯',
+  Refill: '☕',
   Pet: '🐹',
   Journal: '📖',
   Profile: '🏅',
@@ -67,6 +69,7 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Goals" component={GoalsScreen} />
+      <Tab.Screen name="Refill" component={QuickRefillScreen} />
       <Tab.Screen name="Pet" component={PetScreen} />
       <Tab.Screen name="Journal" component={JournalScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
