@@ -220,6 +220,18 @@ export function AppProvider({ children, userId, user }) {
     await supabase.auth.signOut();
   }
 
+  async function deleteAccount() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('No active session.');
+    const res = await fetch('https://equilibrium-teacher-production.up.railway.app/api/delete-account', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Account deletion failed.');
+    await supabase.auth.signOut();
+  }
+
   const boostTimerRef = useRef(null);
   function triggerPippinCelebration() {
     if (boostTimerRef.current) clearTimeout(boostTimerRef.current);
@@ -361,7 +373,7 @@ export function AppProvider({ children, userId, user }) {
       isHardDay, markHardDay, clearHardDay,
       currentDayMode, setDayMode,
       pippinBoost, triggerPippinCelebration,
-      MAX_FEATURED, signOut,
+      MAX_FEATURED, signOut, deleteAccount,
     }}>
       {children}
     </AppContext.Provider>

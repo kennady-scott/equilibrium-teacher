@@ -16,10 +16,11 @@ const BADGES = [
 ];
 
 export default function ProfileScreen() {
-  const { name, updateName, streak, hydration, journalEntries, goals, mood, signOut } = useApp();
+  const { name, updateName, streak, hydration, journalEntries, goals, mood, signOut, deleteAccount } = useApp();
 
   const [nameDraft, setNameDraft] = useState(name);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   function handleSaveName() {
     const trimmed = nameDraft.trim();
@@ -34,6 +35,42 @@ export default function ProfileScreen() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign out', style: 'destructive', onPress: signOut },
     ]);
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      'Delete account',
+      'This permanently deletes your account and all your data — journal entries, goals, and streak history. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Are you sure?',
+              'This is permanent and cannot be reversed.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Yes, delete my account',
+                  style: 'destructive',
+                  onPress: async () => {
+                    setDeleting(true);
+                    try {
+                      await deleteAccount();
+                    } catch (e) {
+                      Alert.alert('Something went wrong', e.message || 'Please try again.');
+                      setDeleting(false);
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
   }
 
   const totalCheckins = goals.reduce((sum, g) => sum + g.checkins.length, 0);
@@ -133,6 +170,15 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut} activeOpacity={0.8}>
         <Text style={styles.signOutText}>Sign out</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.deleteBtn}
+        onPress={handleDeleteAccount}
+        activeOpacity={0.7}
+        disabled={deleting}
+      >
+        <Text style={styles.deleteText}>{deleting ? 'Deleting…' : 'Delete account'}</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -165,4 +211,6 @@ const styles = StyleSheet.create({
   affirmText: { fontSize: 15, fontStyle: 'italic', color: '#4A7A5E', lineHeight: 24, textAlign: 'center' },
   signOutBtn: { backgroundColor: '#fff', borderRadius: 14, paddingVertical: 16, alignItems: 'center', borderWidth: 1.5, borderColor: '#E8E0D8', marginBottom: 16 },
   signOutText: { fontSize: 15, fontWeight: '700', color: '#C0392B' },
+  deleteBtn: { alignItems: 'center', paddingVertical: 12 },
+  deleteText: { fontSize: 13, fontWeight: '600', color: '#B0392B', textDecorationLine: 'underline' },
 });

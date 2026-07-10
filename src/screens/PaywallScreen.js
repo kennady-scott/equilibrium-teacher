@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  ActivityIndicator, Platform, Alert,
+  ActivityIndicator, Platform, Alert, Linking,
 } from 'react-native';
 import { getOfferings, purchasePackage, restorePurchases } from '../lib/purchases';
+
+const PRIVACY_URL = 'https://equilibrium-teacher-production.up.railway.app/privacy';
+const TERMS_URL    = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 
 const FEATURES = [
   { emoji: '🐹', text: 'Pippin — your daily hamster companion' },
@@ -65,8 +68,12 @@ export default function PaywallScreen({ onSubscribed }) {
     p => p.packageType === 'MONTHLY'
   ) ?? offering?.availablePackages?.[0];
 
-  const price     = monthlyPkg?.product?.priceString ?? '$4.99';
-  const trialDays = monthlyPkg?.product?.introPrice?.periodNumberOfUnits ?? 7;
+  const price      = monthlyPkg?.product?.priceString ?? '$4.99';
+  const introPrice = monthlyPkg?.product?.introPrice;
+  const unitsToDays = { DAY: 1, WEEK: 7, MONTH: 30, YEAR: 365 };
+  const trialDays  = introPrice
+    ? introPrice.periodNumberOfUnits * (unitsToDays[introPrice.periodUnit] ?? 1)
+    : 7;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -79,9 +86,13 @@ export default function PaywallScreen({ onSubscribed }) {
         </Text>
       </View>
 
-      {/* Free trial badge */}
-      <View style={styles.trialBadge}>
-        <Text style={styles.trialText}>✨ Try free for {trialDays} days</Text>
+      {/* Pricing — billed amount is the primary, most prominent element */}
+      <View style={styles.priceCard}>
+        <Text style={styles.priceCardTitle}>Refill Pro — Monthly</Text>
+        <Text style={styles.priceCardAmount}>
+          {price}<Text style={styles.priceCardUnit}>/month</Text>
+        </Text>
+        <Text style={styles.priceCardTrial}>✨ {trialDays}-day free trial, then {price}/month</Text>
       </View>
 
       {/* Feature list */}
@@ -109,9 +120,9 @@ export default function PaywallScreen({ onSubscribed }) {
               ? <ActivityIndicator color="#fff" />
               : (
                 <>
-                  <Text style={styles.ctaBtnText}>Start free trial</Text>
+                  <Text style={styles.ctaBtnText}>Subscribe — {price}/month</Text>
                   <Text style={styles.ctaBtnSub}>
-                    then {price}/month — cancel anytime
+                    starts with a {trialDays}-day free trial
                   </Text>
                 </>
               )
@@ -131,11 +142,21 @@ export default function PaywallScreen({ onSubscribed }) {
           </TouchableOpacity>
 
           <Text style={styles.legal}>
-            Payment charged to your account after the {trialDays}-day free trial.
+            Refill Pro — Monthly is {price}/month after a {trialDays}-day free trial.
             Subscription renews automatically unless cancelled at least 24 hours
             before the end of the current period. Manage or cancel anytime in
             your device settings.
           </Text>
+
+          <View style={styles.linksRow}>
+            <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)}>
+              <Text style={styles.linkText}>Privacy Policy</Text>
+            </TouchableOpacity>
+            <Text style={styles.linkDivider}>·</Text>
+            <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)}>
+              <Text style={styles.linkText}>Terms of Use</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
     </ScrollView>
@@ -149,15 +170,25 @@ const styles = StyleSheet.create({
   pippin: { fontSize: 80, marginBottom: 12 },
   title: { fontSize: 30, fontWeight: '800', color: '#2A3E2A', marginBottom: 8 },
   subtitle: { fontSize: 16, color: '#7A9C7A', textAlign: 'center', lineHeight: 24 },
-  trialBadge: {
-    backgroundColor: '#7B9E87',
+  priceCard: {
+    backgroundColor: '#fff',
     borderRadius: 20,
-    paddingVertical: 10,
+    paddingVertical: 22,
     paddingHorizontal: 20,
-    alignSelf: 'center',
+    alignItems: 'center',
     marginBottom: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  trialText: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  priceCardTitle: { fontSize: 13, fontWeight: '700', color: '#7A9C7A', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 },
+  priceCardAmount: { fontSize: 40, fontWeight: '800', color: '#2A3E2A' },
+  priceCardUnit: { fontSize: 16, fontWeight: '700', color: '#7A9C7A' },
+  priceCardTrial: { fontSize: 14, fontWeight: '600', color: '#7B9E87', marginTop: 8 },
+  linksRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 14 },
+  linkText: { fontSize: 12, color: '#7A9C7A', fontWeight: '700', textDecorationLine: 'underline' },
+  linkDivider: { fontSize: 12, color: '#B0B8B0', marginHorizontal: 8 },
   featuresCard: {
     backgroundColor: '#fff',
     borderRadius: 20,

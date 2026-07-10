@@ -1,9 +1,48 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
 const PORT = process.env.PORT || 3000;
 const DIST = path.join(__dirname, 'dist');
+
+const SUPABASE_URL = 'https://whiejaorazomkbrtwogw.supabase.co';
+const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null;
+
+function deleteAccount(req, res) {
+  let body = '';
+  req.on('data', chunk => { body += chunk; });
+  req.on('end', async () => {
+    if (!supabaseAdmin) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Account deletion is not configured on the server.' }));
+      return;
+    }
+    const token = (req.headers['authorization'] || '').replace('Bearer ', '');
+    if (!token) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Missing auth token.' }));
+      return;
+    }
+    try {
+      const { data: { user }, error: userErr } = await supabaseAdmin.auth.getUser(token);
+      if (userErr || !user) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid session.' }));
+        return;
+      }
+      const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+      if (delErr) throw delErr;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true }));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message || 'Deletion failed.' }));
+    }
+  });
+}
 
 const MIME = {
   '.html': 'text/html',
@@ -51,6 +90,11 @@ http.createServer((req, res) => {
   if (req.url === '/privacy') {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(PRIVACY_HTML);
+    return;
+  }
+
+  if (req.url === '/api/delete-account' && req.method === 'POST') {
+    deleteAccount(req, res);
     return;
   }
 
