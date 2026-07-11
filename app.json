@@ -13,7 +13,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.equilibriumapp.app",
-      "buildNumber": "7",
+      "buildNumber": "8",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,

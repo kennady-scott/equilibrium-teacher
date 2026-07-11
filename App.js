@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, View, ActivityIndicator } from 'react-native';
 import { supabase } from './src/lib/supabase';
 import { initPurchases, getSubscriptionStatus } from './src/lib/purchases';
@@ -47,8 +47,10 @@ const ICONS = {
 };
 
 function MainTabs() {
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
+      sceneContainerStyle={{ paddingTop: insets.top }}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => (
           <Text style={{ fontSize: focused ? 24 : 20 }}>{ICONS[route.name]}</Text>
@@ -59,9 +61,9 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopColor: '#F0EDE8',
-          paddingBottom: 6,
+          paddingBottom: Math.max(insets.bottom, 6),
           paddingTop: 6,
-          height: 64,
+          height: 58 + insets.bottom,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         headerShown: false,
