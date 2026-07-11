@@ -81,7 +81,7 @@ const PRIVACY_HTML = `<!DOCTYPE html>
   <h2>Where your data is stored</h2>
   <p>Your data is stored securely using <a href="https://supabase.com">Supabase</a>, a SOC 2 Type II certified cloud database provider based in the United States.</p>
   <h2>Data retention</h2>
-  <p>Your data is kept for as long as your account is active. You can request deletion at any time by emailing <a href="mailto:kennady.nickell@gmail.com">kennady.nickell@gmail.com</a> — we will permanently delete all your data within 30 days.</p>
+  <p>Your data is kept for as long as your account is active. You can delete your account and all associated data at any time directly in the app — go to <strong>Profile → Delete account</strong>. This permanently and immediately deletes your account. Alternatively, you can request deletion by emailing <a href="mailto:kennady.nickell@gmail.com">kennady.nickell@gmail.com</a>.</p>
   <h2>Children's privacy</h2>
   <p>Refill is designed for teachers (adults). We do not knowingly collect data from anyone under 13.</p>
   <h2>Contact</h2>

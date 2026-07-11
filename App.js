@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, View, ActivityIndicator } from 'react-native';
 import { supabase } from './src/lib/supabase';
 import { initPurchases, getSubscriptionStatus } from './src/lib/purchases';
@@ -49,8 +49,8 @@ const ICONS = {
 function MainTabs() {
   const insets = useSafeAreaInsets();
   return (
+    <SafeAreaView edges={['top']} style={{ flex: 1 }}>
     <Tab.Navigator
-      sceneContainerStyle={{ paddingTop: insets.top }}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => (
           <Text style={{ fontSize: focused ? 24 : 20 }}>{ICONS[route.name]}</Text>
@@ -76,6 +76,7 @@ function MainTabs() {
       <Tab.Screen name="Journal" component={JournalScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
+    </SafeAreaView>
   );
 }
 
